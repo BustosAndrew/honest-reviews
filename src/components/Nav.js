@@ -134,6 +134,9 @@ export const Nav = () => {
 									fontWeight: "bold",
 									fontSize: "1.2rem",
 								}}
+								onClick={() =>
+									newReview && setNewReview(!newReview)
+								}
 							/>
 							<Tab
 								label="About"
