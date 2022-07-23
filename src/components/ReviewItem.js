@@ -4,7 +4,7 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { Stack } from "@mui/material";
+import { Stack, CardActionArea } from "@mui/material";
 import { IconButton } from "@mui/material";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
@@ -34,31 +34,35 @@ const NewCard = ({ date }) => {
 					</IconButton>
 				</Stack>
 			</CardActions>
-			<Stack>
-				<CardContent>
-					<Typography
-						sx={{ fontSize: 14 }}
-						color="text.secondary"
-						gutterBottom
-					>
-						Time submitted: {date} ms
-					</Typography>
-					<Typography variant="h5" component="div">
-						belent
-					</Typography>
-					<Typography sx={{ mb: 1.5 }} color="text.secondary">
-						adjective
-					</Typography>
-					<Typography variant="body2">
-						well meaning and kindly.
-						<br />
-						{'"a benevolent smile"'}
-					</Typography>
-				</CardContent>
-				<CardActions>
-					<Button size="small">Learn More</Button>
-				</CardActions>
-			</Stack>
+			<CardActionArea onClick={() => console.log("clicked")}>
+				<Stack>
+					<CardContent>
+						<Typography
+							sx={{ fontSize: 14 }}
+							color="text.secondary"
+							gutterBottom
+						>
+							Time submitted: {date} ms
+						</Typography>
+						<Typography variant="h5" component="div">
+							belent
+						</Typography>
+						<Typography sx={{ mb: 1.5 }} color="text.secondary">
+							adjective
+						</Typography>
+						<Typography variant="body2">
+							well meaning and kindly.
+							<br />
+							{'"a benevolent smile"'}
+						</Typography>
+					</CardContent>
+				</Stack>
+			</CardActionArea>
+			<CardActions sx={{}}>
+				<Button sx={{ color: "black" }} size="small">
+					Read More
+				</Button>
+			</CardActions>
 		</div>
 	);
 };
@@ -68,9 +72,7 @@ export const ReviewItem = ({ date }) => {
 	return (
 		<Box sx={{ width: "100%", textAlign: "left" }}>
 			<Card
-				onClick={() => console.log("clicked")}
 				sx={{
-					":hover": { cursor: "pointer" },
 					background: "#f5f5f5",
 				}}
 				raised={raised}
