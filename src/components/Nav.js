@@ -56,6 +56,7 @@ export const Nav = () => {
 	const [reviewItems, setReviewItems] = useState();
 	const [newReview, setNewReview] = useState(false);
 	const [filter, setFilter] = useState("newest");
+	const [page, setPage] = useState();
 	const maxPerPage = 5;
 
 	const handlerFilter = (event) => {
@@ -68,6 +69,7 @@ export const Nav = () => {
 	};
 
 	const pageChange = (page) => {
+		//setPage(page);
 		if (!reviews[page * maxPerPage - 1]) {
 			console.log(
 				reviews.slice(page * maxPerPage - maxPerPage, reviews.length)
@@ -98,9 +100,10 @@ export const Nav = () => {
 		if (filter === "newest")
 			newReviews.sort((a, b) => b.date - a.date); // getting newest first
 		else newReviews.sort((a, b) => a.date - b.date); // getting oldest first
-		setReviews(newReviews);
 
+		setReviews(newReviews);
 		setReviewItems(newReviews.slice(0, maxPerPage));
+		setPage(1);
 	}, [filter]);
 
 	return (
@@ -197,16 +200,13 @@ export const Nav = () => {
 									count={Math.ceil(
 										reviews.length / maxPerPage
 									)}
+									page={page}
 									sx={{
 										display: "flex",
 										justifyContent: "center",
 									}}
 									onChange={(event, page) => {
-										console.log(
-											Math.ceil(
-												reviews.length / maxPerPage
-											)
-										);
+										setPage(page);
 										pageChange(page);
 									}}
 								/>
