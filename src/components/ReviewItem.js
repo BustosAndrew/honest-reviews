@@ -20,10 +20,10 @@ import { useState } from "react";
 // 	</Box>
 // );
 
-const NewCard = ({ date }) => {
+const CardInfo = ({ date, reviewHandler }) => {
 	return (
 		<div style={{ display: "flex" }}>
-			<CardActions>
+			<CardActions sx={{ alignSelf: "flex-start" }}>
 				<Stack textAlign="center">
 					<IconButton>
 						<ArrowCircleUpIcon></ArrowCircleUpIcon>
@@ -34,7 +34,7 @@ const NewCard = ({ date }) => {
 					</IconButton>
 				</Stack>
 			</CardActions>
-			<CardActionArea onClick={() => console.log("clicked")}>
+			<CardActionArea onClick={() => reviewHandler(date)}>
 				<Stack>
 					<CardContent>
 						<Typography
@@ -59,7 +59,11 @@ const NewCard = ({ date }) => {
 				</Stack>
 			</CardActionArea>
 			<CardActions sx={{}}>
-				<Button sx={{ color: "black" }} size="small">
+				<Button
+					sx={{ color: "black" }}
+					size="small"
+					onClick={() => reviewHandler(date)}
+				>
 					Read More
 				</Button>
 			</CardActions>
@@ -67,7 +71,7 @@ const NewCard = ({ date }) => {
 	);
 };
 
-export const ReviewItem = ({ date }) => {
+export const ReviewItem = ({ date, reviewHandler }) => {
 	const [raised, setRaised] = useState(false);
 	return (
 		<Box sx={{ width: "100%", textAlign: "left" }}>
@@ -79,7 +83,7 @@ export const ReviewItem = ({ date }) => {
 				onMouseOver={() => setRaised(true)}
 				onMouseOut={() => setRaised(false)}
 			>
-				<NewCard date={date} />
+				<CardInfo date={date} reviewHandler={reviewHandler} />
 			</Card>
 		</Box>
 	);

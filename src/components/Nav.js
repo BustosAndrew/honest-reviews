@@ -12,14 +12,15 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import { Pagination } from "@mui/material";
 //import CssBaseline from "@mui/material/CssBaseline";
 
 import { useState, useEffect } from "react";
 import { ReviewItem } from "./ReviewItem";
 import { About } from "./About";
-import { Pagination } from "@mui/material";
 import { Contact } from "./Contact";
 import { CreateReview } from "./CreateReview";
+import { Review } from "./Review";
 
 const TabPanel = (props) => {
 	const { children, value, index, ...other } = props;
@@ -57,6 +58,7 @@ export const Nav = () => {
 	const [newReview, setNewReview] = useState(false);
 	const [filter, setFilter] = useState("newest");
 	const [page, setPage] = useState();
+	const [reviewPage, setReviewPage] = useState(null);
 	const maxPerPage = 5;
 
 	const handlerFilter = (event) => {
@@ -66,6 +68,11 @@ export const Nav = () => {
 	const handleChange = (event, newValue) => {
 		setValue(newValue);
 		if (newValue !== 0) setNewReview(false);
+	};
+
+	const reviewHandler = (date) => {
+		const renderPage = <Review date={date} />;
+		setReviewPage(renderPage);
 	};
 
 	const pageChange = (page) => {
@@ -135,7 +142,8 @@ export const Nav = () => {
 									fontSize: "1.2rem",
 								}}
 								onClick={() =>
-									newReview && setNewReview(!newReview)
+									(newReview && setNewReview(!newReview)) ||
+									(reviewPage && setReviewPage(null))
 								}
 							/>
 							<Tab
@@ -146,6 +154,9 @@ export const Nav = () => {
 									fontWeight: "bold",
 									fontSize: "1.2rem",
 								}}
+								onClick={() =>
+									reviewPage && setReviewPage(null)
+								}
 							/>
 							<Tab
 								label="Contact"
@@ -155,10 +166,14 @@ export const Nav = () => {
 									fontWeight: "bold",
 									fontSize: "1.2rem",
 								}}
+								onClick={() =>
+									reviewPage && setReviewPage(null)
+								}
 							/>
 						</Tabs>
 					</Box>
-					{!newReview && value === 0 && (
+					{reviewPage}
+					{!reviewPage && !newReview && value === 0 && (
 						<IconButton
 							onClick={createReview}
 							aria-label="create review"
@@ -166,16 +181,16 @@ export const Nav = () => {
 							<AddBoxIcon />
 						</IconButton>
 					)}
-					{newReview && value === 0 && (
+					{!reviewPage && newReview && value === 0 && (
 						<IconButton
 							onClick={createReview}
-							aria-label="create review"
+							aria-label="cancel review"
 						>
 							<CancelIcon />
 						</IconButton>
 					)}
 					<TabPanel value={value} index={0}>
-						{!newReview && reviewItems && (
+						{!reviewPage && !newReview && reviewItems && (
 							<Stack spacing={5}>
 								<FormControl
 									sx={{ width: "110px", textAlign: "center" }}
@@ -197,7 +212,11 @@ export const Nav = () => {
 									</Select>
 								</FormControl>
 								{reviewItems.map((val, indx) => (
-									<ReviewItem date={val.date} key={indx} />
+									<ReviewItem
+										date={val.date}
+										key={indx}
+										reviewHandler={reviewHandler}
+									/>
 								))}
 								<Pagination
 									count={Math.ceil(
