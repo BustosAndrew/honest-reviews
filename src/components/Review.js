@@ -9,27 +9,38 @@ import { IconButton } from "@mui/material";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 
-// import { useState } from "react";
+import { useState } from "react";
+//import { doc, updateDoc } from "firebase/firestore";
 
-// const bull = (
-// 	<Box
-// 		component="span"
-// 		sx={{ display: "inline-block", mx: "2px", transform: "scale(0.8)" }}
-// 	>
-// 		•
-// 	</Box>
-// );
-
-const CardInfo = ({ date }) => {
+const CardInfo = ({
+	date,
+	username,
+	caption,
+	link,
+	upvotes,
+	upvoteHandler,
+	id,
+}) => {
+	const [currUpvotes, setCurrUpvotes] = useState(upvotes);
 	return (
 		<div style={{ display: "flex" }}>
 			<CardActions sx={{ alignSelf: "flex-start" }}>
 				<Stack textAlign="center">
-					<IconButton>
+					<IconButton
+						onClick={() => {
+							upvoteHandler("up", id, currUpvotes);
+							setCurrUpvotes(currUpvotes + 1);
+						}}
+					>
 						<ArrowCircleUpIcon></ArrowCircleUpIcon>
 					</IconButton>
-					<Typography fontWeight="bold">{1}</Typography>
-					<IconButton>
+					<Typography fontWeight="bold">{currUpvotes}</Typography>
+					<IconButton
+						onClick={() => {
+							upvoteHandler("down", id, currUpvotes);
+							setCurrUpvotes(currUpvotes - 1);
+						}}
+					>
 						<ArrowCircleDownIcon></ArrowCircleDownIcon>
 					</IconButton>
 				</Stack>
@@ -44,23 +55,28 @@ const CardInfo = ({ date }) => {
 						Time submitted: {date} ms
 					</Typography>
 					<Typography variant="h5" component="div">
-						belent
+						{username}
 					</Typography>
 					<Typography sx={{ mb: 1.5 }} color="text.secondary">
-						adjective
+						{link}
 					</Typography>
-					<Typography variant="body2">
-						well meaning and kindly.
-						<br />
-						{'"a benevolent smile"'}
-					</Typography>
+					<Typography variant="body2">{caption}</Typography>
 				</CardContent>
 			</Stack>
 		</div>
 	);
 };
 
-export const Review = ({ date }) => {
+export const Review = ({
+	date,
+	caption,
+	link,
+	username,
+	upvotes,
+	db,
+	id,
+	upvoteHandler,
+}) => {
 	return (
 		<Box sx={{ width: "100%", textAlign: "left" }}>
 			<Card
@@ -68,7 +84,15 @@ export const Review = ({ date }) => {
 					background: "#f5f5f5",
 				}}
 			>
-				<CardInfo date={date} />
+				<CardInfo
+					date={date}
+					caption={caption}
+					username={username}
+					link={link}
+					upvotes={upvotes}
+					upvoteHandler={upvoteHandler}
+					id={id}
+				/>
 			</Card>
 		</Box>
 	);

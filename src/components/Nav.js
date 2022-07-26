@@ -22,10 +22,14 @@ import { Contact } from "./Contact";
 import { CreateReview } from "./CreateReview";
 import { Review } from "./Review";
 
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import {
+	collection,
+	doc,
+	getDocs,
+	getFirestore,
+	updateDoc,
+} from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -37,8 +41,9 @@ const firebaseConfig = {
 	appId: "1:260627698277:web:cdd642ed44c946e2362c8c",
 };
 
-// Initialize Firebase
+// Initialize Firebase/firestore
 const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const TabPanel = (props) => {
 	const { children, value, index, ...other } = props;
@@ -99,6 +104,7 @@ export const Nav = () => {
 	const [filter, setFilter] = useState("newest");
 	const [page, setPage] = useState(1);
 	const [reviewPage, setReviewPage] = useState(null);
+	const [currUpvotes, setCurrUpvotes] = useState(null);
 	const [state, dispatch] = useReducer(reducer, initialState);
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
@@ -112,8 +118,18 @@ export const Nav = () => {
 		if (newValue !== 0) setNewReview(false);
 	};
 
-	const reviewHandler = (date) => {
-		const renderPage = <Review date={date} />;
+	const reviewHandler = (date, caption, username, link, upvotes, id) => {
+		const renderPage = (
+			<Review
+				date={date}
+				caption={caption}
+				username={username}
+				link={link}
+				upvotes={currUpvotes || upvotes}
+				upvoteHandler={upvoteHandler}
+				id={id}
+			/>
+		);
 		setReviewPage(renderPage);
 	};
 
@@ -150,32 +166,54 @@ export const Nav = () => {
 			});
 	};
 
+	const getReviews = async () => {
+		const querySnapshot = await getDocs(collection(db, "reviews"));
+		querySnapshot.forEach((doc) => {
+			// doc.data() is never undefined for query doc snapshots
+			//console.log(doc.id, " => ", doc.data());
+		});
+		return querySnapshot;
+	};
+
+	const upvoteHandler = async (vote, id, upvotes) => {
+		const review = doc(db, "reviews", id);
+		const upvote = upvotes + 1;
+		const downvote = upvotes - 1;
+		if (vote === "up") {
+			setCurrUpvotes(upvote);
+			await updateDoc(review, { upvotes: upvote });
+		} else {
+			setCurrUpvotes(downvote);
+			await updateDoc(review, { upvotes: downvote });
+		}
+	};
+
 	useEffect(() => {
-		console.log("rendering");
+		//console.log("rendering");
 		let currReviews = reviews;
 		if (!currReviews) {
-			const newReviews = [
-				{ date: new Date().getTime() + 1 },
-				{ date: new Date().getTime() + 2 },
-				{ date: new Date().getTime() + 3 },
-				{ date: new Date().getTime() + 4 },
-				{ date: new Date().getTime() + 5 },
-				{ date: new Date().getTime() - 1 },
-			];
-			currReviews = newReviews;
-			if (filter === "newest")
-				currReviews.sort((a, b) => b.date - a.date);
-			// getting newest first
-			else currReviews.sort((a, b) => a.date - b.date); // getting oldest first
+			currReviews = [];
+			getReviews().then((res) => {
+				res.forEach((doc) => {
+					// doc.data() is never undefined for query doc snapshots
+					//console.log(doc);
+					console.log(doc.id, " => ", doc.data());
+					currReviews.push([doc.id, doc.data()]);
+				});
+				if (filter === "newest")
+					currReviews.sort((a, b) => b[1].created - a[1].created);
+				// getting newest first
+				else currReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest first
 
-			//setReviews(currReviews);
-			dispatch({ type: ACTIONS.SET_REVIEWS, data: currReviews });
+				//setReviews(currReviews);
+				dispatch({ type: ACTIONS.SET_REVIEWS, data: currReviews });
+			});
 		} else {
 			const currReviews = reviews;
 			if (filter === "newest")
-				currReviews.sort((a, b) => b.date - a.date);
+				currReviews.sort((a, b) => b[1].created - a[1].created);
 			// getting newest first
-			else currReviews.sort((a, b) => a.date - b.date); // getting oldest first
+			else currReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest first
 
 			//setReviewItems(currReviews.slice(0, maxPerPage));
 		}
@@ -283,14 +321,29 @@ export const Nav = () => {
 								</FormControl>
 								{reviewItems.map((val, indx) => (
 									<ReviewItem
-										date={val.date}
+										date={val[1].created}
+										username={val[1].username}
+										link={val[1].link}
+										caption={val[1].caption}
+										upvotes={currUpvotes || val[1].upvotes}
 										key={indx}
-										reviewHandler={reviewHandler}
+										reviewHandler={() =>
+											reviewHandler(
+												val[1].created,
+												val[1].caption,
+												val[1].username,
+												val[1].link,
+												currUpvotes || val[1].upvotes,
+												val[0]
+											)
+										}
+										upvoteHandler={upvoteHandler}
+										id={val[0]}
 									/>
 								))}
 								<Pagination
 									count={Math.ceil(
-										reviews.length / maxPerPage
+										reviews && reviews.length / maxPerPage
 									)}
 									page={page}
 									sx={{
@@ -305,7 +358,7 @@ export const Nav = () => {
 							</Stack>
 						)}
 						{newReview && (
-							<CreateReview createReview={createReview} />
+							<CreateReview db={db} createReview={createReview} />
 						)}
 					</TabPanel>
 					<TabPanel value={value} index={1}>

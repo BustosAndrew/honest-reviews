@@ -11,25 +11,36 @@ import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 
 import { useState } from "react";
 
-// const bull = (
-// 	<Box
-// 		component="span"
-// 		sx={{ display: "inline-block", mx: "2px", transform: "scale(0.8)" }}
-// 	>
-// 		•
-// 	</Box>
-// );
-
-const CardInfo = ({ date, reviewHandler }) => {
+const CardInfo = ({
+	date,
+	reviewHandler,
+	username,
+	caption,
+	link,
+	upvotes,
+	upvoteHandler,
+	id,
+}) => {
+	const [currUpvotes, setCurrUpvotes] = useState(upvotes);
 	return (
 		<div style={{ display: "flex" }}>
 			<CardActions sx={{ alignSelf: "flex-start" }}>
 				<Stack textAlign="center">
-					<IconButton>
+					<IconButton
+						onClick={() => {
+							upvoteHandler("up", id, currUpvotes);
+							setCurrUpvotes(currUpvotes + 1);
+						}}
+					>
 						<ArrowCircleUpIcon></ArrowCircleUpIcon>
 					</IconButton>
-					<Typography fontWeight="bold">{1}</Typography>
-					<IconButton>
+					<Typography fontWeight="bold">{currUpvotes}</Typography>
+					<IconButton
+						onClick={() => {
+							upvoteHandler("down", id, currUpvotes);
+							setCurrUpvotes(currUpvotes - 1);
+						}}
+					>
 						<ArrowCircleDownIcon></ArrowCircleDownIcon>
 					</IconButton>
 				</Stack>
@@ -45,16 +56,12 @@ const CardInfo = ({ date, reviewHandler }) => {
 							Time submitted: {date} ms
 						</Typography>
 						<Typography variant="h5" component="div">
-							belent
+							{username}
 						</Typography>
 						<Typography sx={{ mb: 1.5 }} color="text.secondary">
-							adjective
+							{link}
 						</Typography>
-						<Typography variant="body2">
-							well meaning and kindly.
-							<br />
-							{'"a benevolent smile"'}
-						</Typography>
+						<Typography variant="body2">{caption}</Typography>
 					</CardContent>
 				</Stack>
 			</CardActionArea>
@@ -71,7 +78,16 @@ const CardInfo = ({ date, reviewHandler }) => {
 	);
 };
 
-export const ReviewItem = ({ date, reviewHandler }) => {
+export const ReviewItem = ({
+	date,
+	reviewHandler,
+	link,
+	username,
+	caption,
+	upvotes,
+	upvoteHandler,
+	id,
+}) => {
 	const [raised, setRaised] = useState(false);
 	return (
 		<Box sx={{ width: "100%", textAlign: "left" }}>
@@ -83,7 +99,16 @@ export const ReviewItem = ({ date, reviewHandler }) => {
 				onMouseOver={() => setRaised(true)}
 				onMouseOut={() => setRaised(false)}
 			>
-				<CardInfo date={date} reviewHandler={reviewHandler} />
+				<CardInfo
+					date={date}
+					reviewHandler={reviewHandler}
+					caption={caption}
+					username={username}
+					link={link}
+					upvotes={upvotes}
+					upvoteHandler={upvoteHandler}
+					id={id}
+				/>
 			</Card>
 		</Box>
 	);
