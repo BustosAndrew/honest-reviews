@@ -101,9 +101,6 @@ export const Nav = () => {
 
 	const pageChange = (page) => {
 		if (!reviews[page * maxPerPage - 1]) {
-			console.log(
-				reviews.slice(page * maxPerPage - maxPerPage, reviews.length)
-			);
 			// setReviewItems(
 			// 	reviews.slice(page * maxPerPage - maxPerPage, reviews.length)
 			// );
@@ -166,7 +163,7 @@ export const Nav = () => {
 		}
 		//setReviewItems(currReviews.slice(0, maxPerPage));
 		dispatch({ type: ACTIONS.SET_REVIEW_ITEMS, data: currReviews });
-	}, [filter, reviews, reviewItems]);
+	}, [filter, reviews]);
 
 	return (
 		<>
