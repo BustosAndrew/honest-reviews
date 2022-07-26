@@ -22,6 +22,24 @@ import { Contact } from "./Contact";
 import { CreateReview } from "./CreateReview";
 import { Review } from "./Review";
 
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+	apiKey: "AIzaSyAH7u9gRSiL-8B211-Kjh2dmUrkw7gIuac",
+	authDomain: "honestreviews-492ea.firebaseapp.com",
+	projectId: "honestreviews-492ea",
+	storageBucket: "honestreviews-492ea.appspot.com",
+	messagingSenderId: "260627698277",
+	appId: "1:260627698277:web:cdd642ed44c946e2362c8c",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
 const TabPanel = (props) => {
 	const { children, value, index, ...other } = props;
 
