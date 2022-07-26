@@ -209,19 +209,19 @@ export const Nav = () => {
 				dispatch({ type: ACTIONS.SET_REVIEWS, data: currReviews });
 			});
 		} else {
-			const currReviews = reviews;
+			//const currReviews = reviews;
 			if (filter === "newest")
 				currReviews.sort((a, b) => b[1].created - a[1].created);
 			// getting newest first
 			else currReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest first
 
 			//setReviewItems(currReviews.slice(0, maxPerPage));
-		}
-		//setReviewItems(currReviews.slice(0, maxPerPage));
-		dispatch({
+                        dispatch({
 			type: ACTIONS.SET_REVIEW_ITEMS,
 			data: currReviews.slice(0, maxPerPage),
-		});
+		        });
+		}
+		//setReviewItems(currReviews.slice(0, maxPerPage));
 	}, [filter, reviews]);
 
 	return (
