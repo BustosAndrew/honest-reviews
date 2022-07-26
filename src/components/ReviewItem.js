@@ -45,7 +45,18 @@ const CardInfo = ({
 					</IconButton>
 				</Stack>
 			</CardActions>
-			<CardActionArea onClick={() => reviewHandler(date)}>
+			<CardActionArea
+				onClick={() =>
+					reviewHandler(
+						date,
+						caption,
+						username,
+						link,
+						currUpvotes,
+						id
+					)
+				}
+			>
 				<Stack>
 					<CardContent>
 						<Typography

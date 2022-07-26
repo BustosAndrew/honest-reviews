@@ -104,7 +104,7 @@ export const Nav = () => {
 	const [filter, setFilter] = useState("newest");
 	const [page, setPage] = useState(1);
 	const [reviewPage, setReviewPage] = useState(null);
-	const [currUpvotes, setCurrUpvotes] = useState(null);
+	//const [currUpvotes, setCurrUpvotes] = useState(null);
 	const [state, dispatch] = useReducer(reducer, initialState);
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
@@ -125,7 +125,7 @@ export const Nav = () => {
 				caption={caption}
 				username={username}
 				link={link}
-				upvotes={currUpvotes || upvotes}
+				upvotes={upvotes}
 				upvoteHandler={upvoteHandler}
 				id={id}
 			/>
@@ -180,16 +180,16 @@ export const Nav = () => {
 		const upvote = upvotes + 1;
 		const downvote = upvotes - 1;
 		if (vote === "up") {
-			setCurrUpvotes(upvote);
+			//setCurrUpvotes(upvote);
 			await updateDoc(review, { upvotes: upvote });
 		} else {
-			setCurrUpvotes(downvote);
+			//setCurrUpvotes(downvote);
 			await updateDoc(review, { upvotes: downvote });
 		}
 	};
 
 	useEffect(() => {
-		//console.log("rendering");
+		console.log("rendering");
 		let currReviews = reviews;
 		if (!currReviews) {
 			currReviews = [];
@@ -218,7 +218,10 @@ export const Nav = () => {
 			//setReviewItems(currReviews.slice(0, maxPerPage));
 		}
 		//setReviewItems(currReviews.slice(0, maxPerPage));
-		dispatch({ type: ACTIONS.SET_REVIEW_ITEMS, data: currReviews });
+		dispatch({
+			type: ACTIONS.SET_REVIEW_ITEMS,
+			data: currReviews.slice(0, maxPerPage),
+		});
 	}, [filter, reviews]);
 
 	return (
@@ -325,7 +328,7 @@ export const Nav = () => {
 										username={val[1].username}
 										link={val[1].link}
 										caption={val[1].caption}
-										upvotes={currUpvotes || val[1].upvotes}
+										upvotes={val[1].upvotes}
 										key={indx}
 										reviewHandler={() =>
 											reviewHandler(
@@ -333,7 +336,7 @@ export const Nav = () => {
 												val[1].caption,
 												val[1].username,
 												val[1].link,
-												currUpvotes || val[1].upvotes,
+												val[1].upvotes,
 												val[0]
 											)
 										}

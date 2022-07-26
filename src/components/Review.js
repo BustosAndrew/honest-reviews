@@ -73,7 +73,6 @@ export const Review = ({
 	link,
 	username,
 	upvotes,
-	db,
 	id,
 	upvoteHandler,
 }) => {
