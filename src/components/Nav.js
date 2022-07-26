@@ -53,7 +53,7 @@ function a11yProps(index) {
 
 export const Nav = () => {
 	const [value, setValue] = useState(0);
-	const [reviews, setReviews] = useState();
+	const [reviews, setReviews] = useState(null);
 	const [reviewItems, setReviewItems] = useState();
 	const [newReview, setNewReview] = useState(false);
 	const [filter, setFilter] = useState("newest");
@@ -96,22 +96,31 @@ export const Nav = () => {
 	};
 
 	useEffect(() => {
-		const newReviews = [
-			{ date: new Date().getTime() + 1 },
-			{ date: new Date().getTime() + 2 },
-			{ date: new Date().getTime() + 3 },
-			{ date: new Date().getTime() + 4 },
-			{ date: new Date().getTime() + 5 },
-			{ date: new Date().getTime() - 1 },
-		];
-		if (filter === "newest")
-			newReviews.sort((a, b) => b.date - a.date); // getting newest first
-		else newReviews.sort((a, b) => a.date - b.date); // getting oldest first
+		if (!reviews) {
+			const newReviews = [
+				{ date: new Date().getTime() + 1 },
+				{ date: new Date().getTime() + 2 },
+				{ date: new Date().getTime() + 3 },
+				{ date: new Date().getTime() + 4 },
+				{ date: new Date().getTime() + 5 },
+				{ date: new Date().getTime() - 1 },
+			];
 
-		setReviews(newReviews);
-		setReviewItems(newReviews.slice(0, maxPerPage));
+			if (filter === "newest") newReviews.sort((a, b) => b.date - a.date);
+			// getting newest first
+			else newReviews.sort((a, b) => a.date - b.date); // getting oldest first
+
+			setReviews(newReviews);
+			setReviewItems(newReviews.slice(0, maxPerPage));
+		} else {
+			if (filter === "newest") reviews.sort((a, b) => b.date - a.date);
+			// getting newest first
+			else reviews.sort((a, b) => a.date - b.date); // getting oldest first
+
+			setReviewItems(reviews.slice(0, maxPerPage));
+		}
 		setPage(1);
-	}, [filter]);
+	}, [filter, reviews]);
 
 	return (
 		<>
