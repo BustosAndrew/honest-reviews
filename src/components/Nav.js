@@ -15,7 +15,7 @@ import Select from "@mui/material/Select";
 import { Pagination } from "@mui/material";
 //import CssBaseline from "@mui/material/CssBaseline";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { ReviewItem } from "./ReviewItem";
 import { About } from "./About";
 import { Contact } from "./Contact";
@@ -51,14 +51,38 @@ function a11yProps(index) {
 	};
 }
 
+const ACTIONS = {
+	SET_REVIEWS: "set_reviews",
+	SET_REVIEW_ITEMS: "set_review_items",
+	SET_PAGE: "set_page",
+};
+
+const initialState = {
+	reviews: null,
+	reviewItems: null,
+};
+
+const reducer = (state, action) => {
+	switch (action.type) {
+		case ACTIONS.SET_REVIEWS:
+			return { ...state, reviews: action.data };
+		case ACTIONS.SET_REVIEW_ITEMS:
+			return { ...state, reviewItems: action.data };
+		default:
+			throw new Error();
+	}
+};
+
 export const Nav = () => {
 	const [value, setValue] = useState(0);
-	const [reviews, setReviews] = useState(null);
-	const [reviewItems, setReviewItems] = useState();
+	// const [reviews, setReviews] = useState(null);
+	// const [reviewItems, setReviewItems] = useState();
 	const [newReview, setNewReview] = useState(false);
 	const [filter, setFilter] = useState("newest");
-	const [page, setPage] = useState();
+	const [page, setPage] = useState(1);
 	const [reviewPage, setReviewPage] = useState(null);
+	const [state, dispatch] = useReducer(reducer, initialState);
+	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
 
 	const handlerFilter = (event) => {
@@ -76,27 +100,45 @@ export const Nav = () => {
 	};
 
 	const pageChange = (page) => {
-		//setPage(page);
 		if (!reviews[page * maxPerPage - 1]) {
 			console.log(
 				reviews.slice(page * maxPerPage - maxPerPage, reviews.length)
 			);
-			setReviewItems(
-				reviews.slice(page * maxPerPage - maxPerPage, reviews.length)
-			);
-		} else
-			setReviewItems(
-				reviews.slice(page * maxPerPage - maxPerPage, maxPerPage)
-			);
+			// setReviewItems(
+			// 	reviews.slice(page * maxPerPage - maxPerPage, reviews.length)
+			// );
+			dispatch({
+				type: ACTIONS.SET_REVIEW_ITEMS,
+				data: reviews.slice(
+					page * maxPerPage - maxPerPage,
+					reviews.length
+				),
+			});
+		}
+		// setReviewItems(
+		// 	reviews.slice(page * maxPerPage - maxPerPage, maxPerPage)
+		// );
+		else
+			dispatch({
+				type: ACTIONS.SET_REVIEW_ITEMS,
+				data: reviews.slice(page * maxPerPage - maxPerPage, maxPerPage),
+			});
 	};
 
 	const createReview = () => {
 		setNewReview(!newReview);
-		if (newReview === false) setReviewItems(reviews.slice(0, maxPerPage));
+		if (newReview === false)
+			//setReviewItems(reviews.slice(0, maxPerPage));
+			dispatch({
+				type: ACTIONS.SET_REVIEW_ITEMS,
+				data: reviews.slice(0, maxPerPage),
+			});
 	};
 
 	useEffect(() => {
-		if (!reviews) {
+		console.log("rendering");
+		let currReviews = reviews;
+		if (!currReviews) {
 			const newReviews = [
 				{ date: new Date().getTime() + 1 },
 				{ date: new Date().getTime() + 2 },
@@ -105,22 +147,26 @@ export const Nav = () => {
 				{ date: new Date().getTime() + 5 },
 				{ date: new Date().getTime() - 1 },
 			];
-
-			if (filter === "newest") newReviews.sort((a, b) => b.date - a.date);
+			currReviews = newReviews;
+			if (filter === "newest")
+				currReviews.sort((a, b) => b.date - a.date);
 			// getting newest first
-			else newReviews.sort((a, b) => a.date - b.date); // getting oldest first
+			else currReviews.sort((a, b) => a.date - b.date); // getting oldest first
 
-			setReviews(newReviews);
-			setReviewItems(newReviews.slice(0, maxPerPage));
+			//setReviews(currReviews);
+			dispatch({ type: ACTIONS.SET_REVIEWS, data: currReviews });
 		} else {
-			if (filter === "newest") reviews.sort((a, b) => b.date - a.date);
+			const currReviews = reviews;
+			if (filter === "newest")
+				currReviews.sort((a, b) => b.date - a.date);
 			// getting newest first
-			else reviews.sort((a, b) => a.date - b.date); // getting oldest first
+			else currReviews.sort((a, b) => a.date - b.date); // getting oldest first
 
-			setReviewItems(reviews.slice(0, maxPerPage));
+			//setReviewItems(currReviews.slice(0, maxPerPage));
 		}
-		setPage(1);
-	}, [filter, reviews]);
+		//setReviewItems(currReviews.slice(0, maxPerPage));
+		dispatch({ type: ACTIONS.SET_REVIEW_ITEMS, data: currReviews });
+	}, [filter, reviews, reviewItems]);
 
 	return (
 		<>
