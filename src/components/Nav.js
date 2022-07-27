@@ -81,8 +81,8 @@ const ACTIONS = {
 };
 
 const initialState = {
-	reviews: null,
-	reviewItems: null,
+	reviews: [],
+	reviewItems: [],
 };
 
 const reducer = (state, action) => {
@@ -98,13 +98,10 @@ const reducer = (state, action) => {
 
 export const Nav = () => {
 	const [value, setValue] = useState(0);
-	// const [reviews, setReviews] = useState(null);
-	// const [reviewItems, setReviewItems] = useState();
 	const [newReview, setNewReview] = useState(false);
 	const [filter, setFilter] = useState("newest");
 	const [page, setPage] = useState(1);
 	const [reviewPage, setReviewPage] = useState(null);
-	//const [currUpvotes, setCurrUpvotes] = useState(null);
 	const [state, dispatch] = useReducer(reducer, initialState);
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
@@ -135,9 +132,6 @@ export const Nav = () => {
 
 	const pageChange = (page) => {
 		if (!reviews[page * maxPerPage - 1]) {
-			// setReviewItems(
-			// 	reviews.slice(page * maxPerPage - maxPerPage, reviews.length)
-			// );
 			dispatch({
 				type: ACTIONS.SET_REVIEW_ITEMS,
 				data: reviews.slice(
@@ -145,11 +139,7 @@ export const Nav = () => {
 					reviews.length
 				),
 			});
-		}
-		// setReviewItems(
-		// 	reviews.slice(page * maxPerPage - maxPerPage, maxPerPage)
-		// );
-		else
+		} else
 			dispatch({
 				type: ACTIONS.SET_REVIEW_ITEMS,
 				data: reviews.slice(page * maxPerPage - maxPerPage, maxPerPage),
@@ -168,10 +158,6 @@ export const Nav = () => {
 
 	const getReviews = async () => {
 		const querySnapshot = await getDocs(collection(db, "reviews"));
-		querySnapshot.forEach((doc) => {
-			// doc.data() is never undefined for query doc snapshots
-			//console.log(doc.id, " => ", doc.data());
-		});
 		return querySnapshot;
 	};
 
@@ -189,40 +175,28 @@ export const Nav = () => {
 	};
 
 	useEffect(() => {
-		console.log("rendering");
-		let currReviews = reviews;
-		if (!currReviews) {
-			currReviews = [];
-			getReviews().then((res) => {
-				res.forEach((doc) => {
-					// doc.data() is never undefined for query doc snapshots
-					//console.log(doc);
-					console.log(doc.id, " => ", doc.data());
-					currReviews.push([doc.id, doc.data()]);
-				});
-				if (filter === "newest")
-					currReviews.sort((a, b) => b[1].created - a[1].created);
-				// getting newest first
-				else currReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest first
+		//console.log("rendering");
+		let currReviews = [];
+		getReviews().then((res) => {
+			res.forEach((doc) => {
+				// doc.data() is never undefined for query doc snapshots
 
-				//setReviews(currReviews);
-				dispatch({ type: ACTIONS.SET_REVIEWS, data: currReviews });
+				//console.log(doc.id, " => ", doc.data());
+				currReviews.push([doc.id, doc.data()]);
 			});
-		} else {
-			const currReviews = reviews;
+			//console.log(currReviews);
 			if (filter === "newest")
 				currReviews.sort((a, b) => b[1].created - a[1].created);
-			// getting newest first
-			else currReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest first
+			// getting newest created
+			else currReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest created
 
-			//setReviewItems(currReviews.slice(0, maxPerPage));
-		}
-		//setReviewItems(currReviews.slice(0, maxPerPage));
-		dispatch({
-			type: ACTIONS.SET_REVIEW_ITEMS,
-			data: currReviews.slice(0, maxPerPage),
+			dispatch({ type: ACTIONS.SET_REVIEWS, data: currReviews });
+			dispatch({
+				type: ACTIONS.SET_REVIEW_ITEMS,
+				data: currReviews.slice(0, maxPerPage),
+			});
 		});
-	}, [filter, reviews]);
+	}, [filter]);
 
 	return (
 		<>
@@ -312,7 +286,9 @@ export const Nav = () => {
 										id="demo-simple-select"
 										value={filter}
 										label="Filter"
-										onChange={handlerFilter}
+										onChange={(event) =>
+											handlerFilter(event)
+										}
 									>
 										<MenuItem value={"newest"}>
 											Newest
