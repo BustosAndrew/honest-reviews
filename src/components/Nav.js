@@ -184,18 +184,21 @@ export const Nav = () => {
 				//console.log(doc.id, " => ", doc.data());
 				currReviews.push([doc.id, doc.data()]);
 			});
-			//console.log(currReviews);
 			if (filter === "newest")
 				currReviews.sort((a, b) => b[1].created - a[1].created);
 			// getting newest created
 			else currReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest created
 
-			dispatch({ type: ACTIONS.SET_REVIEWS, data: currReviews });
+			dispatch({
+				type: ACTIONS.SET_REVIEWS,
+				data: currReviews,
+			});
 			dispatch({
 				type: ACTIONS.SET_REVIEW_ITEMS,
 				data: currReviews.slice(0, maxPerPage),
 			});
 		});
+		//setReviewItems(currReviews.slice(0, maxPerPage));
 	}, [filter]);
 
 	return (
