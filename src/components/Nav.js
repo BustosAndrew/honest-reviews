@@ -239,23 +239,22 @@ export const Nav = () => {
 
 				let newPage = Math.ceil(arrPos / maxPerPage);
 				setReviewUpdate((update) => ({ ...update, changed: false }));
-				//setReviewPos(arrPos);
 				pageChange(newPage);
 			}
-			// let newPage = Math.ceil(reviewPos / maxPerPage);
 			pageChange(pageRef.current);
 		} else {
+			// getting newest created
 			if (filter === "newest")
 				dispatch({
 					type: ACTIONS.SET_REVIEW_ITEMS,
 					data: currReviews.newest.slice(0, maxPerPage),
 				});
-			// getting newest created
+			// getting oldest created
 			else if (filter === "oldest")
 				dispatch({
 					type: ACTIONS.SET_REVIEW_ITEMS,
 					data: currReviews.oldest.slice(0, maxPerPage),
-				}); // getting oldest created
+				});
 		}
 	}, [filter, reviewUpdate, reviews, pageChange]);
 
