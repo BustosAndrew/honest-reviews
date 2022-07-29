@@ -13,6 +13,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Pagination } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 //import CssBaseline from "@mui/material/CssBaseline";
 
 import { useState, useEffect, useReducer, useCallback, useRef } from "react";
@@ -108,6 +109,7 @@ export const Nav = () => {
 	const [reviewUpdate, setReviewUpdate] = useState();
 	const [state, dispatch] = useReducer(reducer, initialState);
 	const pageRef = useRef(1);
+	const [loading, setLoading] = useState(true);
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
 
@@ -214,6 +216,7 @@ export const Nav = () => {
 					newest: currReviews,
 					oldest: oldestReviews,
 				});
+				setTimeout(() => setLoading(false), 500);
 			});
 		}
 
@@ -338,10 +341,14 @@ export const Nav = () => {
 						</IconButton>
 					)}
 					<TabPanel value={value} index={0}>
+						{!reviewItems && <CircularProgress size={100} />}
 						{!reviewPage && !newReview && reviewItems && (
 							<Stack spacing={5}>
 								<FormControl
-									sx={{ width: "110px", textAlign: "center" }}
+									sx={{
+										width: "110px",
+										textAlign: "center",
+									}}
 								>
 									<InputLabel>Filter</InputLabel>
 									<Select
@@ -361,46 +368,58 @@ export const Nav = () => {
 										</MenuItem>
 									</Select>
 								</FormControl>
-								{reviewItems.map((val, indx) => {
-									return (
-										<ReviewItem
-											date={val[1].created}
-											username={val[1].username}
-											link={val[1].link}
-											caption={val[1].caption}
-											upvotes={val[1].upvotes}
-											key={indx}
-											reviewHandler={() =>
-												reviewHandler(
-													val[1].created,
-													val[1].caption,
-													val[1].username,
-													val[1].link,
-													val[1].upvotes,
-													val[0]
-												)
-											}
-											upvoteHandler={upvoteHandler}
-											id={val[0]}
-										/>
-									);
-								})}
-								<Pagination
-									count={Math.ceil(
-										reviews.newest &&
-											reviews.newest.length / maxPerPage
-									)}
-									page={page}
-									sx={{
-										display: "flex",
-										justifyContent: "center",
-									}}
-									onChange={(event, page) => {
-										pageRef.current = page;
-										setPage(page);
-										pageChange(page);
-									}}
-								/>
+								{loading && (
+									<CircularProgress
+										sx={{
+											alignSelf: "center",
+										}}
+										size={80}
+									/>
+								)}
+								{!loading &&
+									reviewItems.map((val, indx) => {
+										return (
+											<ReviewItem
+												date={val[1].created}
+												username={val[1].username}
+												link={val[1].link}
+												caption={val[1].caption}
+												upvotes={val[1].upvotes}
+												key={indx}
+												reviewHandler={() =>
+													reviewHandler(
+														val[1].created,
+														val[1].caption,
+														val[1].username,
+														val[1].link,
+														val[1].upvotes,
+														val[0]
+													)
+												}
+												upvoteHandler={upvoteHandler}
+												id={val[0]}
+											/>
+										);
+									})}
+								{!loading && (
+									<Pagination
+										count={Math.ceil(
+											reviews.newest &&
+												reviews.newest.length /
+													maxPerPage
+										)}
+										page={page}
+										sx={{
+											display: "flex",
+											justifyContent: "center",
+										}}
+										onChange={(event, page) => {
+											pageRef.current = page;
+											setPage(page);
+											pageChange(page);
+										}}
+									/>
+								)}
 							</Stack>
 						)}
 						{newReview && (
