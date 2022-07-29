@@ -15,7 +15,7 @@ import Select from "@mui/material/Select";
 import { Pagination } from "@mui/material";
 //import CssBaseline from "@mui/material/CssBaseline";
 
-import { useState, useEffect, useReducer, useCallback } from "react";
+import { useState, useEffect, useReducer, useCallback, useRef } from "react";
 import { ReviewItem } from "./ReviewItem";
 import { About } from "./About";
 import { Contact } from "./Contact";
@@ -107,11 +107,12 @@ export const Nav = () => {
 	const [reviewPage, setReviewPage] = useState(null);
 	const [reviewUpdate, setReviewUpdate] = useState();
 	const [state, dispatch] = useReducer(reducer, initialState);
-	//const [filterChanged, setFilterChanged] = useState(true);
+	const pageRef = useRef(1);
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
 
 	const handlerFilter = (event) => {
+		pageRef.current = 1;
 		setPage(1);
 		setFilter(event.target.value);
 	};
@@ -242,7 +243,7 @@ export const Nav = () => {
 				pageChange(newPage);
 			}
 			// let newPage = Math.ceil(reviewPos / maxPerPage);
-			pageChange(page);
+			pageChange(pageRef.current);
 		} else {
 			if (filter === "newest")
 				dispatch({
@@ -393,6 +394,7 @@ export const Nav = () => {
 										justifyContent: "center",
 									}}
 									onChange={(event, page) => {
+										pageRef.current = page;
 										setPage(page);
 										pageChange(page);
 									}}
