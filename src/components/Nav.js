@@ -15,7 +15,7 @@ import Select from "@mui/material/Select";
 import { Pagination } from "@mui/material";
 //import CssBaseline from "@mui/material/CssBaseline";
 
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useCallback } from "react";
 import { ReviewItem } from "./ReviewItem";
 import { About } from "./About";
 import { Contact } from "./Contact";
@@ -81,14 +81,17 @@ const ACTIONS = {
 };
 
 const initialState = {
-	reviews: [],
+	reviews: { newest: [], oldest: [] },
 	reviewItems: [],
 };
 
 const reducer = (state, action) => {
 	switch (action.type) {
 		case ACTIONS.SET_REVIEWS:
-			return { ...state, reviews: action.data };
+			return {
+				...state,
+				reviews: { newest: action.newest, oldest: action.oldest },
+			};
 		case ACTIONS.SET_REVIEW_ITEMS:
 			return { ...state, reviewItems: action.data };
 		default:
@@ -102,11 +105,14 @@ export const Nav = () => {
 	const [filter, setFilter] = useState("newest");
 	const [page, setPage] = useState(1);
 	const [reviewPage, setReviewPage] = useState(null);
+	const [reviewUpdate, setReviewUpdate] = useState();
 	const [state, dispatch] = useReducer(reducer, initialState);
+	//const [filterChanged, setFilterChanged] = useState(true);
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
 
 	const handlerFilter = (event) => {
+		setPage(1);
 		setFilter(event.target.value);
 	};
 
@@ -130,21 +136,32 @@ export const Nav = () => {
 		setReviewPage(renderPage);
 	};
 
-	const pageChange = (page) => {
-		if (!reviews[page * maxPerPage - 1]) {
-			dispatch({
-				type: ACTIONS.SET_REVIEW_ITEMS,
-				data: reviews.slice(
-					page * maxPerPage - maxPerPage,
-					reviews.length
-				),
-			});
-		} else
-			dispatch({
-				type: ACTIONS.SET_REVIEW_ITEMS,
-				data: reviews.slice(page * maxPerPage - maxPerPage, maxPerPage),
-			});
-	};
+	const pageChange = useCallback(
+		(page) => {
+			let currReviews = [];
+
+			if (filter === "newest") currReviews = reviews.newest;
+			else currReviews = reviews.oldest;
+
+			if (!currReviews[page * maxPerPage - 1]) {
+				dispatch({
+					type: ACTIONS.SET_REVIEW_ITEMS,
+					data: currReviews.slice(
+						page * maxPerPage - maxPerPage,
+						currReviews.length
+					),
+				});
+			} else
+				dispatch({
+					type: ACTIONS.SET_REVIEW_ITEMS,
+					data: currReviews.slice(
+						page * maxPerPage - maxPerPage,
+						maxPerPage
+					),
+				});
+		},
+		[filter, reviews.newest, reviews.oldest]
+	);
 
 	const createReview = () => {
 		setNewReview(!newReview);
@@ -168,38 +185,78 @@ export const Nav = () => {
 		if (vote === "up") {
 			//setCurrUpvotes(upvote);
 			await updateDoc(review, { upvotes: upvote });
+			setReviewUpdate({ newId: id, newUpvotes: upvote, changed: true });
 		} else {
 			//setCurrUpvotes(downvote);
 			await updateDoc(review, { upvotes: downvote });
+			setReviewUpdate({ newId: id, newUpvotes: downvote, changed: true });
 		}
 	};
 
 	useEffect(() => {
-		//console.log("rendering");
-		let currReviews = [];
-		getReviews().then((res) => {
-			res.forEach((doc) => {
-				// doc.data() is never undefined for query doc snapshots
+		console.log("rendering");
+		if (reviews.newest.length === 0) {
+			let currReviews = [];
+			getReviews().then((res) => {
+				res.forEach((doc) => {
+					currReviews.push([doc.id, doc.data()]);
+				});
 
-				//console.log(doc.id, " => ", doc.data());
-				currReviews.push([doc.id, doc.data()]);
+				currReviews.sort((a, b) => b[1].created - a[1].created); // getting newest created
+				let oldestReviews = [];
+
+				for (const review of currReviews) oldestReviews.push(review);
+				oldestReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest created
+
+				dispatch({
+					type: ACTIONS.SET_REVIEWS,
+					newest: currReviews,
+					oldest: oldestReviews,
+				});
 			});
+		}
+
+		let currReviews = { newest: [], oldest: [] };
+		for (const review of reviews.newest) currReviews.newest.push(review);
+		for (const review of reviews.oldest) currReviews.oldest.push(review);
+
+		if (reviewUpdate) {
+			if (reviewUpdate.changed) {
+				let counter = 0;
+				let arrPos = 0;
+				currReviews.newest.forEach((review) => {
+					counter++;
+					if (review[0] === reviewUpdate.newId) {
+						review[1].upvotes = reviewUpdate.newUpvotes;
+						arrPos = counter;
+					}
+				});
+				currReviews.oldest.forEach((review) => {
+					if (review[0] === reviewUpdate.newId)
+						review[1].upvotes = reviewUpdate.newUpvotes;
+				});
+
+				let newPage = Math.ceil(arrPos / maxPerPage);
+				setReviewUpdate((update) => ({ ...update, changed: false }));
+				//setReviewPos(arrPos);
+				pageChange(newPage);
+			}
+			// let newPage = Math.ceil(reviewPos / maxPerPage);
+			pageChange(page);
+		} else {
 			if (filter === "newest")
-				currReviews.sort((a, b) => b[1].created - a[1].created);
+				dispatch({
+					type: ACTIONS.SET_REVIEW_ITEMS,
+					data: currReviews.newest.slice(0, maxPerPage),
+				});
 			// getting newest created
-			else currReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest created
-
-			dispatch({
-				type: ACTIONS.SET_REVIEWS,
-				data: currReviews,
-			});
-			dispatch({
-				type: ACTIONS.SET_REVIEW_ITEMS,
-				data: currReviews.slice(0, maxPerPage),
-			});
-		});
-		//setReviewItems(currReviews.slice(0, maxPerPage));
-	}, [filter]);
+			else if (filter === "oldest")
+				dispatch({
+					type: ACTIONS.SET_REVIEW_ITEMS,
+					data: currReviews.oldest.slice(0, maxPerPage),
+				}); // getting oldest created
+		}
+	}, [filter, reviewUpdate, reviews, pageChange]);
 
 	return (
 		<>
@@ -301,31 +358,34 @@ export const Nav = () => {
 										</MenuItem>
 									</Select>
 								</FormControl>
-								{reviewItems.map((val, indx) => (
-									<ReviewItem
-										date={val[1].created}
-										username={val[1].username}
-										link={val[1].link}
-										caption={val[1].caption}
-										upvotes={val[1].upvotes}
-										key={indx}
-										reviewHandler={() =>
-											reviewHandler(
-												val[1].created,
-												val[1].caption,
-												val[1].username,
-												val[1].link,
-												val[1].upvotes,
-												val[0]
-											)
-										}
-										upvoteHandler={upvoteHandler}
-										id={val[0]}
-									/>
-								))}
+								{reviewItems.map((val, indx) => {
+									return (
+										<ReviewItem
+											date={val[1].created}
+											username={val[1].username}
+											link={val[1].link}
+											caption={val[1].caption}
+											upvotes={val[1].upvotes}
+											key={indx}
+											reviewHandler={() =>
+												reviewHandler(
+													val[1].created,
+													val[1].caption,
+													val[1].username,
+													val[1].link,
+													val[1].upvotes,
+													val[0]
+												)
+											}
+											upvoteHandler={upvoteHandler}
+											id={val[0]}
+										/>
+									);
+								})}
 								<Pagination
 									count={Math.ceil(
-										reviews && reviews.length / maxPerPage
+										reviews.newest &&
+											reviews.newest.length / maxPerPage
 									)}
 									page={page}
 									sx={{

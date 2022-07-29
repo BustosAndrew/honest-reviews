@@ -21,24 +21,21 @@ const CardInfo = ({
 	upvoteHandler,
 	id,
 }) => {
-	const [currUpvotes, setCurrUpvotes] = useState(upvotes);
 	return (
 		<div style={{ display: "flex" }}>
 			<CardActions sx={{ alignSelf: "flex-start" }}>
 				<Stack textAlign="center">
 					<IconButton
 						onClick={() => {
-							upvoteHandler("up", id, currUpvotes);
-							setCurrUpvotes(currUpvotes + 1);
+							upvoteHandler("up", id, upvotes);
 						}}
 					>
 						<ArrowCircleUpIcon></ArrowCircleUpIcon>
 					</IconButton>
-					<Typography fontWeight="bold">{currUpvotes}</Typography>
+					<Typography fontWeight="bold">{upvotes}</Typography>
 					<IconButton
 						onClick={() => {
-							upvoteHandler("down", id, currUpvotes);
-							setCurrUpvotes(currUpvotes - 1);
+							upvoteHandler("down", id, upvotes);
 						}}
 					>
 						<ArrowCircleDownIcon></ArrowCircleDownIcon>
@@ -47,14 +44,7 @@ const CardInfo = ({
 			</CardActions>
 			<CardActionArea
 				onClick={() =>
-					reviewHandler(
-						date,
-						caption,
-						username,
-						link,
-						currUpvotes,
-						id
-					)
+					reviewHandler(date, caption, username, link, upvotes, id)
 				}
 			>
 				<Stack>
