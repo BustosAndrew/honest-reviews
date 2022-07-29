@@ -286,10 +286,13 @@ export const Nav = () => {
 									fontWeight: "bold",
 									fontSize: "1.2rem",
 								}}
-								onClick={() =>
+								onClick={() => {
 									(newReview && setNewReview(!newReview)) ||
-									(reviewPage && setReviewPage(null))
-								}
+										(reviewPage && setReviewPage(null));
+									setPage(1);
+									pageChange(1);
+									pageRef.current = 1;
+								}}
 							/>
 							<Tab
 								label="About"
