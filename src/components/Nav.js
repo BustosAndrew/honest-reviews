@@ -6,7 +6,6 @@ import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import CancelIcon from "@mui/icons-material/Cancel";
-import IconButton from "@mui/material/IconButton";
 import Container from "@mui/material/Container";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -14,6 +13,8 @@ import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import { Pagination } from "@mui/material";
 import { CircularProgress } from "@mui/material";
+import SyncIcon from "@mui/icons-material/Sync";
+import { IconButton } from "@mui/material";
 //import CssBaseline from "@mui/material/CssBaseline";
 
 import { useState, useEffect, useReducer, useCallback, useRef } from "react";
@@ -195,6 +196,17 @@ export const Nav = () => {
 		}
 	};
 
+	const syncHandler = () => {
+		const currReviews = [];
+
+		dispatch({
+			type: ACTIONS.SET_REVIEWS,
+			newest: currReviews,
+			oldest: currReviews,
+		});
+		setLoading(!loading);
+	};
+
 	useEffect(() => {
 		if (!ip)
 			fetch("https://geolocation-db.com/json/")
@@ -268,7 +280,7 @@ export const Nav = () => {
 		<>
 			{/* <CssBaseline /> */}
 			<Container maxWidth="sm">
-				<Box sx={{ width: "100%" }} textAlign="center">
+				<Box textAlign="center">
 					<Typography color="primary" variant="h2" fontWeight="500">
 						Honest Reviews
 					</Typography>
@@ -283,6 +295,7 @@ export const Nav = () => {
 									display: "none",
 								},
 							}}
+							variant="fullWidth"
 						>
 							<Tab
 								label="Reviews"
@@ -290,7 +303,6 @@ export const Nav = () => {
 								sx={{
 									color: "black",
 									fontWeight: "bold",
-									fontSize: "1.2rem",
 								}}
 								onClick={() => {
 									(newReview && setNewReview(!newReview)) ||
@@ -306,7 +318,6 @@ export const Nav = () => {
 								sx={{
 									color: "black",
 									fontWeight: "bold",
-									fontSize: "1.2rem",
 								}}
 								onClick={() =>
 									reviewPage && setReviewPage(null)
@@ -318,7 +329,6 @@ export const Nav = () => {
 								sx={{
 									color: "black",
 									fontWeight: "bold",
-									fontSize: "1.2rem",
 								}}
 								onClick={() =>
 									reviewPage && setReviewPage(null)
@@ -330,7 +340,6 @@ export const Nav = () => {
 								sx={{
 									color: "black",
 									fontWeight: "bold",
-									fontSize: "1.2rem",
 								}}
 								onClick={() =>
 									reviewPage && setReviewPage(null)
@@ -358,31 +367,40 @@ export const Nav = () => {
 					<TabPanel value={value} index={0}>
 						{!reviewItems && <CircularProgress size={100} />}
 						{!reviewPage && !newReview && reviewItems && (
-							<Stack spacing={5}>
-								<FormControl
-									sx={{
-										width: "110px",
-										textAlign: "center",
-									}}
+							<Stack justifyContent="center" spacing={5}>
+								<Stack
+									direction="row"
+									alignItems="center"
+									justifyContent="space-between"
 								>
-									<InputLabel>Filter</InputLabel>
-									<Select
-										labelId="demo-simple-select-label"
-										id="demo-simple-select"
-										value={filter}
-										label="Filter"
-										onChange={(event) =>
-											handlerFilter(event)
-										}
+									<FormControl
+										sx={{
+											width: "110px",
+											textAlign: "center",
+										}}
 									>
-										<MenuItem value={"newest"}>
-											Newest
-										</MenuItem>
-										<MenuItem value={"oldest"}>
-											Oldest
-										</MenuItem>
-									</Select>
-								</FormControl>
+										<InputLabel>Filter</InputLabel>
+										<Select
+											labelId="demo-simple-select-label"
+											id="demo-simple-select"
+											value={filter}
+											label="Filter"
+											onChange={(event) =>
+												handlerFilter(event)
+											}
+										>
+											<MenuItem value={"newest"}>
+												Newest
+											</MenuItem>
+											<MenuItem value={"oldest"}>
+												Oldest
+											</MenuItem>
+										</Select>
+									</FormControl>
+									<IconButton onClick={syncHandler}>
+										<SyncIcon />
+									</IconButton>
+								</Stack>
 								{loading && (
 									<CircularProgress
 										sx={{
