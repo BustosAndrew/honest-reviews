@@ -178,7 +178,7 @@ export const Nav = () => {
 
 			if (filter === "newest") currReviews = reviews.newest;
 			else currReviews = reviews.oldest;
-
+			console.log(currReviews);
 			if (!currReviews[page * maxPerPage - 1]) {
 				dispatch({
 					type: ACTIONS.SET_REVIEW_ITEMS,
@@ -187,25 +187,21 @@ export const Nav = () => {
 						currReviews.length
 					),
 				});
-			} else
+			} else {
+				let arrPos = page * maxPerPage - maxPerPage;
+				if (arrPos < 0) arrPos = 0;
+				console.log(currReviews.slice(arrPos, arrPos + maxPerPage));
 				dispatch({
 					type: ACTIONS.SET_REVIEW_ITEMS,
-					data: currReviews.slice(
-						page * maxPerPage - maxPerPage,
-						maxPerPage
-					),
+					data: currReviews.slice(arrPos, arrPos + maxPerPage),
 				});
+			}
 		},
 		[filter, reviews.newest, reviews.oldest]
 	);
 
 	const createReview = () => {
 		setNewReview(!newReview);
-		if (newReview === false)
-			dispatch({
-				type: ACTIONS.SET_REVIEW_ITEMS,
-				data: reviews.slice(0, maxPerPage),
-			});
 	};
 
 	const getReviews = async () => {
@@ -235,6 +231,7 @@ export const Nav = () => {
 			oldest: currReviews,
 		});
 		setLoading(!loading);
+		setPage(1);
 	};
 
 	useEffect(() => {
@@ -271,13 +268,13 @@ export const Nav = () => {
 
 		if (reviewUpdate) {
 			if (reviewUpdate.changed) {
-				let counter = 0;
-				let arrPos = 0;
+				//let counter = 0;
+				//let arrPos = 0;
 				currReviews.newest.forEach((review) => {
-					counter++;
+					//counter++;
 					if (review[0] === reviewUpdate.newId) {
 						review[1].upvotes = reviewUpdate.newUpvotes;
-						arrPos = counter;
+						//arrPos = counter;
 					}
 				});
 				currReviews.oldest.forEach((review) => {
@@ -285,9 +282,9 @@ export const Nav = () => {
 						review[1].upvotes = reviewUpdate.newUpvotes;
 				});
 
-				let newPage = Math.ceil(arrPos / maxPerPage);
+				//let newPage = Math.ceil(arrPos / maxPerPage);
 				setReviewUpdate((update) => ({ ...update, changed: false }));
-				pageChange(newPage);
+				pageChange(pageRef.current);
 			}
 			pageChange(pageRef.current);
 		} else {

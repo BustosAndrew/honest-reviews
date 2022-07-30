@@ -1,17 +1,70 @@
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import { Button, Typography } from "@mui/material";
+import {
+	Button,
+	Typography,
+	Snackbar,
+	Dialog,
+	DialogActions,
+	DialogContent,
+	DialogContentText,
+	DialogTitle,
+} from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 
 import { collection, addDoc, getDocs } from "firebase/firestore";
-import { useState } from "react";
+import { useState, forwardRef } from "react";
+
+const Alert = forwardRef(function Alert(props, ref) {
+	return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 export const CreateReview = ({ createReview, db, ip }) => {
-	//const db = getFirestore(app);
 	const [username, setUsername] = useState("");
 	const [link, setLink] = useState("https://");
 	const [caption, setCaption] = useState("");
 	const [checked, setChecked] = useState(false);
+	const [open, setOpen] = useState(false);
+	const [openError, setOpenError] = useState({
+		missingInfo: false,
+		checked: true,
+	});
+	const [dialogOpen, setDialogOpen] = useState(false);
+	//const [agreed, setAgreed] = useState(false);
+
+	const handleClose = (event, reason) => {
+		if (reason === "clickaway") {
+			return;
+		}
+
+		setOpen(false);
+	};
+
+	const handleCloseError = (event, reason) => {
+		if (reason === "clickaway") {
+			return;
+		}
+
+		setOpenError({ missingInfo: false, checked: true });
+	};
+
+	const handleDialogOpen = () => {
+		setDialogOpen(true);
+	};
+
+	const handleDialogClose = (agreed) => {
+		setDialogOpen(false);
+		console.log(agreed);
+		if (!agreed) return;
+		addNewIP();
+		submitReview()
+			.then(() => {
+				setOpen(true);
+				setTimeout(() => createReview(), 500); // go back to list of reviews
+			})
+			.catch((error) => console.log(error));
+	};
 
 	const submitReview = async () => {
 		let userBanned = false;
@@ -53,13 +106,17 @@ export const CreateReview = ({ createReview, db, ip }) => {
 
 	const submitHandler = (event) => {
 		event.preventDefault();
-		if (!link || !caption || !username || !checked) return;
-		addNewIP();
-		submitReview()
-			.then(() => {
-				createReview(); // go back to list of reviews
-			})
-			.catch((error) => console.log(error));
+		if (!link || !caption || !username) {
+			setOpenError((...openError) => ({
+				missingInfo: true,
+				...openError,
+			}));
+			return;
+		} else if (!checked) {
+			setOpenError((...openError) => ({ ...openError, checked: false }));
+			return;
+		}
+		handleDialogOpen();
 	};
 
 	return (
@@ -73,7 +130,9 @@ export const CreateReview = ({ createReview, db, ip }) => {
 			}}
 			noValidate
 			autoComplete="off"
-			onSubmit={(e) => submitHandler(e)}
+			onSubmit={(e) => {
+				submitHandler(e);
+			}}
 		>
 			<div>
 				<TextField
@@ -109,12 +168,77 @@ export const CreateReview = ({ createReview, db, ip }) => {
 					<Checkbox
 						checked={checked}
 						onChange={() => setChecked(!checked)}
+						sx={{ color: "red" }}
 					/>
 				</span>
 				<br />
 				<Button type="submit" variant="contained">
 					<Typography variant="button">SUBMIT</Typography>
 				</Button>
+				<Dialog
+					open={dialogOpen}
+					onClose={handleDialogClose}
+					aria-labelledby="alert-dialog-title"
+					aria-describedby="alert-dialog-description"
+				>
+					<DialogTitle id="alert-dialog-title">
+						{"Before you submit a review"}
+					</DialogTitle>
+					<DialogContent>
+						<DialogContentText id="alert-dialog-description">
+							Please be sure that you want to submit a review
+							because after submission your public IP address will
+							be logged into the database, if not already. This is
+							to track who submits their reviews in case they
+							become flagged.
+						</DialogContentText>
+					</DialogContent>
+					<DialogActions>
+						<Button
+							onClick={() => {
+								handleDialogClose(false);
+							}}
+						>
+							Cancel
+						</Button>
+						<Button
+							onClick={() => {
+								handleDialogClose(true);
+							}}
+						>
+							Submit
+						</Button>
+					</DialogActions>
+				</Dialog>
+				<Snackbar
+					open={open}
+					autoHideDuration={6000}
+					onClose={handleClose}
+				>
+					<Alert
+						onClose={handleClose}
+						severity="success"
+						sx={{ width: "100%" }}
+					>
+						You have successfully submitted a new review!
+					</Alert>
+				</Snackbar>
+				<Snackbar
+					open={openError.missingInfo || !openError.checked}
+					autoHideDuration={6000}
+					onClose={handleCloseError}
+				>
+					<Alert
+						onClose={handleCloseError}
+						severity="error"
+						sx={{ width: "100%" }}
+					>
+						{(openError.missingInfo &&
+							"You can't leave any field empty!") ||
+							(!openError.checked &&
+								"You must select the checkbox!")}
+					</Alert>
+				</Snackbar>
 			</div>
 		</Box>
 	);

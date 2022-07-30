@@ -4,7 +4,7 @@ import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 import { useContext, createContext } from "react";
 
-export const ColorModeContext = createContext({ ToggleColorMode: () => {} });
+export const ColorModeContext = createContext({ toggleColorMode: () => {} });
 
 export const ToggleDarkMode = () => {
 	const theme = useTheme();
