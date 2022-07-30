@@ -3,10 +3,10 @@ import TextField from "@mui/material/TextField";
 import { Button, Typography } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs } from "firebase/firestore";
 import { useState } from "react";
 
-export const CreateReview = ({ createReview, db }) => {
+export const CreateReview = ({ createReview, db, ip }) => {
 	//const db = getFirestore(app);
 	const [username, setUsername] = useState("");
 	const [link, setLink] = useState("https://");
@@ -14,6 +14,17 @@ export const CreateReview = ({ createReview, db }) => {
 	const [checked, setChecked] = useState(false);
 
 	const submitReview = async () => {
+		let userBanned = false;
+		const querySnapshot = await getDocs(collection(db, "ips"));
+		querySnapshot.forEach((doc) => {
+			if (doc.data().banned) userBanned = true;
+		});
+
+		if (userBanned) {
+			alert("You are banned from making new reviews.");
+			return;
+		}
+
 		// Add a new document in collection "reviews"
 		await addDoc(collection(db, "reviews"), {
 			username: username,
@@ -24,12 +35,28 @@ export const CreateReview = ({ createReview, db }) => {
 		});
 	};
 
+	const addNewIP = async () => {
+		let ipExists = false;
+		const querySnapshot = await getDocs(collection(db, "ips"));
+		querySnapshot.forEach((doc) => {
+			if (doc.data().ipv4 === ip) ipExists = true;
+		});
+
+		if (ipExists) return;
+
+		await addDoc(collection(db, "ips"), {
+			username: username,
+			ipv4: ip,
+			banned: false,
+		});
+	};
+
 	const submitHandler = (event) => {
 		event.preventDefault();
 		if (!link || !caption || !username || !checked) return;
+		addNewIP();
 		submitReview()
 			.then(() => {
-				console.log("submitted");
 				createReview(); // go back to list of reviews
 			})
 			.catch((error) => console.log(error));

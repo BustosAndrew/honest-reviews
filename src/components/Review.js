@@ -2,15 +2,13 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-// import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Stack } from "@mui/material";
-import { IconButton } from "@mui/material";
+import { IconButton, Link } from "@mui/material";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 
 import { useState } from "react";
-//import { doc, updateDoc } from "firebase/firestore";
 
 const CardInfo = ({
 	date,
@@ -57,9 +55,9 @@ const CardInfo = ({
 					<Typography variant="h5" component="div">
 						{username}
 					</Typography>
-					<Typography sx={{ mb: 1.5 }} color="text.secondary">
+					<Link href={link} sx={{ mb: 1.5 }}>
 						{link}
-					</Typography>
+					</Link>
 					<Typography variant="body2">{caption}</Typography>
 				</CardContent>
 			</Stack>

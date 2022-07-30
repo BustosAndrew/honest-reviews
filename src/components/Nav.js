@@ -22,6 +22,7 @@ import { About } from "./About";
 import { Contact } from "./Contact";
 import { CreateReview } from "./CreateReview";
 import { Review } from "./Review";
+import { Privacy } from "./Privacy";
 
 import { initializeApp } from "firebase/app";
 import {
@@ -110,6 +111,7 @@ export const Nav = () => {
 	const [state, dispatch] = useReducer(reducer, initialState);
 	const pageRef = useRef(1);
 	const [loading, setLoading] = useState(true);
+	const [ip, setIP] = useState("");
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
 
@@ -169,7 +171,6 @@ export const Nav = () => {
 	const createReview = () => {
 		setNewReview(!newReview);
 		if (newReview === false)
-			//setReviewItems(reviews.slice(0, maxPerPage));
 			dispatch({
 				type: ACTIONS.SET_REVIEW_ITEMS,
 				data: reviews.slice(0, maxPerPage),
@@ -186,17 +187,19 @@ export const Nav = () => {
 		const upvote = upvotes + 1;
 		const downvote = upvotes - 1;
 		if (vote === "up") {
-			//setCurrUpvotes(upvote);
 			await updateDoc(review, { upvotes: upvote });
 			setReviewUpdate({ newId: id, newUpvotes: upvote, changed: true });
 		} else {
-			//setCurrUpvotes(downvote);
 			await updateDoc(review, { upvotes: downvote });
 			setReviewUpdate({ newId: id, newUpvotes: downvote, changed: true });
 		}
 	};
 
 	useEffect(() => {
+		if (!ip)
+			fetch("https://geolocation-db.com/json/")
+				.then((res) => res.json())
+				.then((data) => setIP(data.IPv4));
 		console.log("rendering");
 		if (reviews.newest.length === 0) {
 			let currReviews = [];
@@ -259,7 +262,7 @@ export const Nav = () => {
 					data: currReviews.oldest.slice(0, maxPerPage),
 				});
 		}
-	}, [filter, reviewUpdate, reviews, pageChange]);
+	}, [filter, reviewUpdate, reviews, pageChange, ip]);
 
 	return (
 		<>
@@ -312,6 +315,18 @@ export const Nav = () => {
 							<Tab
 								label="Contact"
 								{...a11yProps(2)}
+								sx={{
+									color: "black",
+									fontWeight: "bold",
+									fontSize: "1.2rem",
+								}}
+								onClick={() =>
+									reviewPage && setReviewPage(null)
+								}
+							/>
+							<Tab
+								label="Privacy"
+								{...a11yProps(3)}
 								sx={{
 									color: "black",
 									fontWeight: "bold",
@@ -423,7 +438,11 @@ export const Nav = () => {
 							</Stack>
 						)}
 						{newReview && (
-							<CreateReview db={db} createReview={createReview} />
+							<CreateReview
+								db={db}
+								createReview={createReview}
+								ip={ip}
+							/>
 						)}
 					</TabPanel>
 					<TabPanel value={value} index={1}>
@@ -431,6 +450,9 @@ export const Nav = () => {
 					</TabPanel>
 					<TabPanel value={value} index={2}>
 						<Contact />
+					</TabPanel>
+					<TabPanel value={value} index={3}>
+						<Privacy />
 					</TabPanel>
 				</Box>
 			</Container>
