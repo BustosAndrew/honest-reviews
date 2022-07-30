@@ -284,7 +284,7 @@ export const Nav = () => {
 					<Typography color="primary" variant="h2" fontWeight="500">
 						Honest Reviews
 					</Typography>
-					<Box>
+					<Box display="flex" justifyContent="center">
 						<Tabs
 							value={value}
 							onChange={handleChange}
@@ -295,7 +295,9 @@ export const Nav = () => {
 									display: "none",
 								},
 							}}
-							variant="fullWidth"
+							variant="scrollable"
+							scrollButtons
+							allowScrollButtonsMobile
 						>
 							<Tab
 								label="Reviews"
