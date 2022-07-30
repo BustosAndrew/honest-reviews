@@ -15,15 +15,24 @@ import { Pagination } from "@mui/material";
 import { CircularProgress } from "@mui/material";
 import SyncIcon from "@mui/icons-material/Sync";
 import { IconButton } from "@mui/material";
-//import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
 
-import { useState, useEffect, useReducer, useCallback, useRef } from "react";
+import {
+	useState,
+	useEffect,
+	useReducer,
+	useCallback,
+	useRef,
+	useMemo,
+} from "react";
 import { ReviewItem } from "./ReviewItem";
 import { About } from "./About";
 import { Contact } from "./Contact";
 import { CreateReview } from "./CreateReview";
 import { Review } from "./Review";
 import { Privacy } from "./Privacy";
+import { ToggleDarkMode, ColorModeContext } from "./ToggleDarkMode";
 
 import { initializeApp } from "firebase/app";
 import {
@@ -113,6 +122,27 @@ export const Nav = () => {
 	const pageRef = useRef(1);
 	const [loading, setLoading] = useState(true);
 	const [ip, setIP] = useState("");
+	const [mode, setMode] = useState("light");
+	const colorMode = useMemo(
+		() => ({
+			toggleColorMode: () => {
+				setMode((prevMode) =>
+					prevMode === "light" ? "dark" : "light"
+				);
+			},
+		}),
+		[]
+	);
+
+	const theme = useMemo(
+		() =>
+			createTheme({
+				palette: {
+					mode,
+				},
+			}),
+		[mode]
+	);
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
 
@@ -277,205 +307,214 @@ export const Nav = () => {
 	}, [filter, reviewUpdate, reviews, pageChange, ip]);
 
 	return (
-		<>
-			{/* <CssBaseline /> */}
-			<Container maxWidth="sm">
-				<Box textAlign="center">
-					<Typography color="primary" variant="h2" fontWeight="500">
-						Honest Reviews
-					</Typography>
-					<Box display="flex" justifyContent="center">
-						<Tabs
-							value={value}
-							onChange={handleChange}
-							aria-label="navigation tabs"
-							centered
-							TabIndicatorProps={{
-								style: {
-									display: "none",
-								},
-							}}
-							variant="scrollable"
-							scrollButtons
-							allowScrollButtonsMobile
+		<ColorModeContext.Provider value={colorMode}>
+			<ThemeProvider theme={theme}>
+				<CssBaseline />
+				<Container maxWidth="sm">
+					<Box textAlign="center">
+						<Typography
+							variant="h2"
+							fontWeight="500"
+							color={"primary"}
 						>
-							<Tab
-								label="Reviews"
-								{...a11yProps(0)}
-								sx={{
-									color: "black",
-									fontWeight: "bold",
+							Honest Reviews
+						</Typography>
+						<ToggleDarkMode />
+						<Box display="flex" justifyContent="center">
+							<Tabs
+								value={value}
+								onChange={handleChange}
+								aria-label="navigation tabs"
+								TabIndicatorProps={{
+									style: {
+										display: "none",
+									},
 								}}
-								onClick={() => {
-									(newReview && setNewReview(!newReview)) ||
-										(reviewPage && setReviewPage(null));
-									setPage(1);
-									pageChange(1);
-									pageRef.current = 1;
-								}}
-							/>
-							<Tab
-								label="About"
-								{...a11yProps(1)}
-								sx={{
-									color: "black",
-									fontWeight: "bold",
-								}}
-								onClick={() =>
-									reviewPage && setReviewPage(null)
-								}
-							/>
-							<Tab
-								label="Contact"
-								{...a11yProps(2)}
-								sx={{
-									color: "black",
-									fontWeight: "bold",
-								}}
-								onClick={() =>
-									reviewPage && setReviewPage(null)
-								}
-							/>
-							<Tab
-								label="Privacy"
-								{...a11yProps(3)}
-								sx={{
-									color: "black",
-									fontWeight: "bold",
-								}}
-								onClick={() =>
-									reviewPage && setReviewPage(null)
-								}
-							/>
-						</Tabs>
-					</Box>
-					{reviewPage}
-					{!reviewPage && !newReview && value === 0 && (
-						<IconButton
-							onClick={createReview}
-							aria-label="create review"
-						>
-							<AddBoxIcon />
-						</IconButton>
-					)}
-					{!reviewPage && newReview && value === 0 && (
-						<IconButton
-							onClick={createReview}
-							aria-label="cancel review"
-						>
-							<CancelIcon />
-						</IconButton>
-					)}
-					<TabPanel value={value} index={0}>
-						{!reviewItems && <CircularProgress size={100} />}
-						{!reviewPage && !newReview && reviewItems && (
-							<Stack justifyContent="center" spacing={5}>
-								<Stack
-									direction="row"
-									alignItems="center"
-									justifyContent="space-between"
-								>
-									<FormControl
-										sx={{
-											width: "110px",
-											textAlign: "center",
-										}}
+								variant="scrollable"
+								scrollButtons
+								allowScrollButtonsMobile
+							>
+								<Tab
+									label="Reviews"
+									{...a11yProps(0)}
+									sx={{
+										fontWeight: "bold",
+										color: "text.primary",
+									}}
+									onClick={() => {
+										(newReview &&
+											setNewReview(!newReview)) ||
+											(reviewPage && setReviewPage(null));
+										setPage(1);
+										pageChange(1);
+										pageRef.current = 1;
+									}}
+								/>
+								<Tab
+									label="About"
+									{...a11yProps(1)}
+									sx={{
+										fontWeight: "bold",
+										color: "text.primary",
+									}}
+									onClick={() =>
+										reviewPage && setReviewPage(null)
+									}
+								/>
+								<Tab
+									label="Contact"
+									{...a11yProps(2)}
+									sx={{
+										fontWeight: "bold",
+										color: "text.primary",
+									}}
+									onClick={() =>
+										reviewPage && setReviewPage(null)
+									}
+								/>
+								<Tab
+									label="Privacy"
+									{...a11yProps(3)}
+									sx={{
+										color: "text.primary",
+										fontWeight: "bold",
+									}}
+									onClick={() =>
+										reviewPage && setReviewPage(null)
+									}
+								/>
+							</Tabs>
+						</Box>
+						{reviewPage}
+						{!reviewPage && !newReview && value === 0 && (
+							<IconButton
+								onClick={createReview}
+								aria-label="create review"
+							>
+								<AddBoxIcon />
+							</IconButton>
+						)}
+						{!reviewPage && newReview && value === 0 && (
+							<IconButton
+								onClick={createReview}
+								aria-label="cancel review"
+							>
+								<CancelIcon />
+							</IconButton>
+						)}
+						<TabPanel value={value} index={0}>
+							{!reviewItems && <CircularProgress size={100} />}
+							{!reviewPage && !newReview && reviewItems && (
+								<Stack justifyContent="center" spacing={5}>
+									<Stack
+										direction="row"
+										alignItems="center"
+										justifyContent="space-between"
 									>
-										<InputLabel>Filter</InputLabel>
-										<Select
-											labelId="demo-simple-select-label"
-											id="demo-simple-select"
-											value={filter}
-											label="Filter"
-											onChange={(event) =>
-												handlerFilter(event)
-											}
+										<FormControl
+											sx={{
+												width: "110px",
+												textAlign: "center",
+											}}
 										>
-											<MenuItem value={"newest"}>
-												Newest
-											</MenuItem>
-											<MenuItem value={"oldest"}>
-												Oldest
-											</MenuItem>
-										</Select>
-									</FormControl>
-									<IconButton onClick={syncHandler}>
-										<SyncIcon />
-									</IconButton>
-								</Stack>
-								{loading && (
-									<CircularProgress
-										sx={{
-											alignSelf: "center",
-										}}
-										size={80}
-									/>
-								)}
-								{!loading &&
-									reviewItems.map((val, indx) => {
-										return (
-											<ReviewItem
-												date={val[1].created}
-												username={val[1].username}
-												link={val[1].link}
-												caption={val[1].caption}
-												upvotes={val[1].upvotes}
-												key={indx}
-												reviewHandler={() =>
-													reviewHandler(
-														val[1].created,
-														val[1].caption,
-														val[1].username,
-														val[1].link,
-														val[1].upvotes,
-														val[0]
-													)
+											<InputLabel>Filter</InputLabel>
+											<Select
+												labelId="demo-simple-select-label"
+												id="demo-simple-select"
+												value={filter}
+												label="Filter"
+												onChange={(event) =>
+													handlerFilter(event)
 												}
-												upvoteHandler={upvoteHandler}
-												id={val[0]}
-											/>
-										);
-									})}
-								{!loading && (
-									<Pagination
-										count={Math.ceil(
-											reviews.newest &&
-												reviews.newest.length /
-													maxPerPage
-										)}
-										page={page}
-										sx={{
-											display: "flex",
-											justifyContent: "center",
-										}}
-										onChange={(event, page) => {
-											pageRef.current = page;
-											setPage(page);
-											pageChange(page);
-										}}
-									/>
-								)}
-							</Stack>
-						)}
-						{newReview && (
-							<CreateReview
-								db={db}
-								createReview={createReview}
-								ip={ip}
-							/>
-						)}
-					</TabPanel>
-					<TabPanel value={value} index={1}>
-						<About />
-					</TabPanel>
-					<TabPanel value={value} index={2}>
-						<Contact />
-					</TabPanel>
-					<TabPanel value={value} index={3}>
-						<Privacy />
-					</TabPanel>
-				</Box>
-			</Container>
-		</>
+											>
+												<MenuItem value={"newest"}>
+													Newest
+												</MenuItem>
+												<MenuItem value={"oldest"}>
+													Oldest
+												</MenuItem>
+											</Select>
+										</FormControl>
+										<IconButton onClick={syncHandler}>
+											<SyncIcon />
+										</IconButton>
+									</Stack>
+									{loading && (
+										<CircularProgress
+											sx={{
+												alignSelf: "center",
+											}}
+											size={80}
+										/>
+									)}
+									{!loading &&
+										reviewItems.map((val, indx) => {
+											return (
+												<ReviewItem
+													date={val[1].created}
+													username={val[1].username}
+													link={val[1].link}
+													caption={val[1].caption}
+													upvotes={val[1].upvotes}
+													key={indx}
+													reviewHandler={() =>
+														reviewHandler(
+															val[1].created,
+															val[1].caption,
+															val[1].username,
+															val[1].link,
+															val[1].upvotes,
+															val[0]
+														)
+													}
+													upvoteHandler={
+														upvoteHandler
+													}
+													id={val[0]}
+												/>
+											);
+										})}
+									{!loading && (
+										<Pagination
+											count={Math.ceil(
+												reviews.newest &&
+													reviews.newest.length /
+														maxPerPage
+											)}
+											page={page}
+											sx={{
+												display: "flex",
+												justifyContent: "center",
+											}}
+											onChange={(event, page) => {
+												pageRef.current = page;
+												setPage(page);
+												pageChange(page);
+											}}
+										/>
+									)}
+								</Stack>
+							)}
+							{newReview && (
+								<CreateReview
+									db={db}
+									createReview={createReview}
+									ip={ip}
+								/>
+							)}
+						</TabPanel>
+						<TabPanel value={value} index={1}>
+							<About />
+						</TabPanel>
+						<TabPanel value={value} index={2}>
+							<Contact />
+						</TabPanel>
+						<TabPanel value={value} index={3}>
+							<Privacy />
+						</TabPanel>
+					</Box>
+				</Container>
+			</ThemeProvider>
+		</ColorModeContext.Provider>
 	);
 };

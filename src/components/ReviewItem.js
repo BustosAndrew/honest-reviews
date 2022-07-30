@@ -4,7 +4,7 @@ import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
-import { Stack, CardActionArea } from "@mui/material";
+import { Stack, CardActionArea, useTheme } from "@mui/material";
 import { IconButton } from "@mui/material";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
@@ -20,7 +20,9 @@ const CardInfo = ({
 	upvotes,
 	upvoteHandler,
 	id,
+	theme,
 }) => {
+	//const theme = useTheme();
 	return (
 		<div style={{ display: "flex" }}>
 			<CardActions sx={{ alignSelf: "flex-start" }}>
@@ -68,9 +70,14 @@ const CardInfo = ({
 			</CardActionArea>
 			<CardActions sx={{}}>
 				<Button
-					sx={{ color: "black" }}
 					size="small"
 					onClick={() => reviewHandler(date)}
+					sx={{
+						color:
+							theme.palette.mode === "light"
+								? "black"
+								: "inherit",
+					}}
 				>
 					Read More
 				</Button>
@@ -90,11 +97,20 @@ export const ReviewItem = ({
 	id,
 }) => {
 	const [raised, setRaised] = useState(false);
+	const theme = useTheme();
 	return (
-		<Box sx={{ width: "100%", textAlign: "left" }}>
+		<Box
+			sx={{
+				width: "100%",
+				textAlign: "left",
+				bgcolor: "background.default",
+				color: "text.primary",
+			}}
+		>
 			<Card
 				sx={{
-					background: "#f5f5f5",
+					bgcolor:
+						theme.palette.mode === "light" ? "#f5f5f5" : "inherit",
 				}}
 				raised={raised}
 				onMouseOver={() => setRaised(true)}
@@ -109,6 +125,7 @@ export const ReviewItem = ({
 					upvotes={upvotes}
 					upvoteHandler={upvoteHandler}
 					id={id}
+					theme={theme}
 				/>
 			</Card>
 		</Box>

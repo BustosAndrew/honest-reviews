@@ -3,7 +3,7 @@ import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
-import { Stack } from "@mui/material";
+import { Stack, useTheme } from "@mui/material";
 import { IconButton, Link } from "@mui/material";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
@@ -22,7 +22,11 @@ const CardInfo = ({
 	const [currUpvotes, setCurrUpvotes] = useState(upvotes);
 	return (
 		<div style={{ display: "flex" }}>
-			<CardActions sx={{ alignSelf: "flex-start" }}>
+			<CardActions
+				sx={{
+					alignSelf: "flex-start",
+				}}
+			>
 				<Stack textAlign="center">
 					<IconButton
 						onClick={() => {
@@ -74,11 +78,19 @@ export const Review = ({
 	id,
 	upvoteHandler,
 }) => {
+	const theme = useTheme();
 	return (
-		<Box sx={{ width: "100%", textAlign: "left" }}>
+		<Box
+			sx={{
+				width: "100%",
+				textAlign: "left",
+				bgcolor: "background.default",
+			}}
+		>
 			<Card
 				sx={{
-					background: "#f5f5f5",
+					bgcolor:
+						theme.palette.mode === "light" ? "#f5f5f5" : "inherit",
 				}}
 			>
 				<CardInfo
