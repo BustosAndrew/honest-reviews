@@ -9,12 +9,16 @@ import {
 	DialogContent,
 	DialogContentText,
 	DialogTitle,
+	FormGroup,
+	Switch,
+	FormControlLabel,
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 
 import { collection, addDoc, getDocs } from "firebase/firestore";
-import { useState, forwardRef } from "react";
+import { useState, forwardRef, useEffect } from "react";
+import * as ls from "local-storage";
 
 const Alert = forwardRef(function Alert(props, ref) {
 	return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -29,23 +33,19 @@ export const CreateReview = ({ createReview, db, ip }) => {
 	const [openError, setOpenError] = useState({
 		missingInfo: false,
 		checked: true,
+		fail: false,
+		message: "",
 	});
 	const [dialogOpen, setDialogOpen] = useState(false);
-	//const [agreed, setAgreed] = useState(false);
+	const [choice, setChoice] = useState(false);
 
 	const handleClose = (event, reason) => {
-		if (reason === "clickaway") {
-			return;
-		}
-
+		if (reason === "clickaway") return;
 		setOpen(false);
 	};
 
 	const handleCloseError = (event, reason) => {
-		if (reason === "clickaway") {
-			return;
-		}
-
+		if (reason === "clickaway") return;
 		setOpenError({ missingInfo: false, checked: true });
 	};
 
@@ -54,9 +54,11 @@ export const CreateReview = ({ createReview, db, ip }) => {
 	};
 
 	const handleDialogClose = (agreed) => {
+		//console.log(agreed);
 		setDialogOpen(false);
-		console.log(agreed);
+
 		if (!agreed) return;
+		if (choice) ls("choice", true);
 		addNewIP();
 		submitReview()
 			.then(() => {
@@ -107,17 +109,42 @@ export const CreateReview = ({ createReview, db, ip }) => {
 	const submitHandler = (event) => {
 		event.preventDefault();
 		if (!link || !caption || !username) {
-			setOpenError((...openError) => ({
-				missingInfo: true,
+			setOpenError((openError) => ({
 				...openError,
+				missingInfo: true,
 			}));
 			return;
 		} else if (!checked) {
-			setOpenError((...openError) => ({ ...openError, checked: false }));
+			setOpenError((openError) => ({
+				...openError,
+				checked: false,
+			}));
 			return;
 		}
-		handleDialogOpen();
+
+		if (!ls("choice")) {
+			handleDialogOpen();
+			return;
+		} else {
+			addNewIP();
+			submitReview()
+				.then(() => {
+					setOpen(true);
+					setTimeout(() => createReview(), 500); // go back to list of reviews
+				})
+				.catch((error) =>
+					setOpenError((openError) => ({
+						...openError,
+						fail: true,
+						message: error,
+					}))
+				);
+		}
 	};
+
+	useEffect(() => {
+		ls.set("choice", false);
+	}, []);
 
 	return (
 		<Box
@@ -177,7 +204,7 @@ export const CreateReview = ({ createReview, db, ip }) => {
 				</Button>
 				<Dialog
 					open={dialogOpen}
-					onClose={handleDialogClose}
+					onClose={() => setDialogOpen(false)}
 					aria-labelledby="alert-dialog-title"
 					aria-describedby="alert-dialog-description"
 				>
@@ -193,21 +220,37 @@ export const CreateReview = ({ createReview, db, ip }) => {
 							become flagged.
 						</DialogContentText>
 					</DialogContent>
-					<DialogActions>
-						<Button
-							onClick={() => {
-								handleDialogClose(false);
-							}}
-						>
-							Cancel
-						</Button>
-						<Button
-							onClick={() => {
-								handleDialogClose(true);
-							}}
-						>
-							Submit
-						</Button>
+					<DialogActions
+						sx={{
+							display: "flex",
+							justifyContent: "space-between",
+						}}
+					>
+						<FormGroup>
+							<FormControlLabel
+								checked={choice}
+								onChange={() => setChoice(!choice)}
+								control={<Switch />}
+								label="Remember my choice"
+								labelPlacement="end"
+							/>
+						</FormGroup>
+						<Box>
+							<Button
+								onClick={() => {
+									handleDialogClose(false);
+								}}
+							>
+								Cancel
+							</Button>
+							<Button
+								onClick={() => {
+									handleDialogClose(true);
+								}}
+							>
+								Submit
+							</Button>
+						</Box>
 					</DialogActions>
 				</Dialog>
 				<Snackbar
@@ -224,7 +267,11 @@ export const CreateReview = ({ createReview, db, ip }) => {
 					</Alert>
 				</Snackbar>
 				<Snackbar
-					open={openError.missingInfo || !openError.checked}
+					open={
+						openError.missingInfo ||
+						!openError.checked ||
+						openError.fail
+					}
 					autoHideDuration={6000}
 					onClose={handleCloseError}
 				>
@@ -236,7 +283,8 @@ export const CreateReview = ({ createReview, db, ip }) => {
 						{(openError.missingInfo &&
 							"You can't leave any field empty!") ||
 							(!openError.checked &&
-								"You must select the checkbox!")}
+								"You must select the checkbox!") ||
+							(openError.fail && "Error: " + openError.message)}
 					</Alert>
 				</Snackbar>
 			</div>
