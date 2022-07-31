@@ -98,7 +98,7 @@ export const ReviewItem = ({
 					bgcolor:
 						theme.palette.mode === "light" ? "#f5f5f5" : "inherit",
 					maxHeight: "10rem",
-					wordBreak: "break-all",
+					overflowWrap: "break-word",
 				}}
 				raised={raised}
 				onMouseOver={() => setRaised(true)}
