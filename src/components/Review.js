@@ -48,7 +48,7 @@ const CardInfo = ({
 				</Stack>
 			</CardActions>
 			<Stack>
-				<CardContent>
+				<CardContent sx={{}}>
 					<Typography
 						sx={{ fontSize: 14 }}
 						color="text.secondary"
@@ -91,6 +91,9 @@ export const Review = ({
 				sx={{
 					bgcolor:
 						theme.palette.mode === "light" ? "#f5f5f5" : "inherit",
+					height: "100%",
+					overflowWrap: "break-word",
+					wordBreak: "break-all",
 				}}
 			>
 				<CardInfo

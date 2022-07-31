@@ -402,7 +402,7 @@ export const Nav = () => {
 						<TabPanel value={value} index={0}>
 							{!reviewItems && <CircularProgress size={100} />}
 							{!reviewPage && !newReview && reviewItems && (
-								<Stack justifyContent="center" spacing={5}>
+								<Stack justifyContent="center" spacing={3}>
 									<Stack
 										direction="row"
 										alignItems="center"

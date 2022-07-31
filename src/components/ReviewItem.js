@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import Button from "@mui/material/Button";
+//import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Stack, CardActionArea, useTheme } from "@mui/material";
 import { IconButton } from "@mui/material";
@@ -24,7 +24,7 @@ const CardInfo = ({
 }) => {
 	//const theme = useTheme();
 	return (
-		<div style={{ display: "flex" }}>
+		<Box display="flex">
 			<CardActions sx={{ alignSelf: "flex-start" }}>
 				<Stack textAlign="center">
 					<IconButton
@@ -68,21 +68,7 @@ const CardInfo = ({
 					</CardContent>
 				</Stack>
 			</CardActionArea>
-			<CardActions sx={{}}>
-				<Button
-					size="small"
-					onClick={() => reviewHandler(date)}
-					sx={{
-						color:
-							theme.palette.mode === "light"
-								? "black"
-								: "inherit",
-					}}
-				>
-					Read More
-				</Button>
-			</CardActions>
-		</div>
+		</Box>
 	);
 };
 
@@ -111,6 +97,8 @@ export const ReviewItem = ({
 				sx={{
 					bgcolor:
 						theme.palette.mode === "light" ? "#f5f5f5" : "inherit",
+					maxHeight: "10rem",
+					wordBreak: "break-all",
 				}}
 				raised={raised}
 				onMouseOver={() => setRaised(true)}
