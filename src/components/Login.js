@@ -1,4 +1,4 @@
-import { TextField, Typography, Stack, Button } from "@mui/material";
+import { TextField, Typography, Button } from "@mui/material";
 
 import { useState } from "react";
 
@@ -19,8 +19,8 @@ export const Login = ({ pageHandler, app, userHandler }) => {
 				// ...
 			})
 			.catch((error) => {
-				const errorCode = error.code;
-				const errorMessage = error.message;
+				// const errorCode = error.code;
+				// const errorMessage = error.message;
 			});
 	};
 
