@@ -161,7 +161,7 @@ export const CreateReview = ({ createReview, db, ip }) => {
 				submitHandler(e);
 			}}
 		>
-			<div>
+			<Box>
 				<TextField
 					error={!username}
 					// id="outlined-error-helper-text"
@@ -287,7 +287,7 @@ export const CreateReview = ({ createReview, db, ip }) => {
 							(openError.fail && "Error: " + openError.message)}
 					</Alert>
 				</Snackbar>
-			</div>
+			</Box>
 		</Box>
 	);
 };

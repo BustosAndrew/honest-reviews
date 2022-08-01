@@ -33,6 +33,7 @@ import { CreateReview } from "./CreateReview";
 import { Review } from "./Review";
 import { Privacy } from "./Privacy";
 import { ToggleDarkMode, ColorModeContext } from "./ToggleDarkMode";
+import { Profile } from "./Profile";
 
 import { initializeApp } from "firebase/app";
 import {
@@ -178,7 +179,7 @@ export const Nav = () => {
 
 			if (filter === "newest") currReviews = reviews.newest;
 			else currReviews = reviews.oldest;
-			console.log(currReviews);
+
 			if (!currReviews[page * maxPerPage - 1]) {
 				dispatch({
 					type: ACTIONS.SET_REVIEW_ITEMS,
@@ -190,7 +191,7 @@ export const Nav = () => {
 			} else {
 				let arrPos = page * maxPerPage - maxPerPage;
 				if (arrPos < 0) arrPos = 0;
-				console.log(currReviews.slice(arrPos, arrPos + maxPerPage));
+
 				dispatch({
 					type: ACTIONS.SET_REVIEW_ITEMS,
 					data: currReviews.slice(arrPos, arrPos + maxPerPage),
@@ -268,13 +269,9 @@ export const Nav = () => {
 
 		if (reviewUpdate) {
 			if (reviewUpdate.changed) {
-				//let counter = 0;
-				//let arrPos = 0;
 				currReviews.newest.forEach((review) => {
-					//counter++;
 					if (review[0] === reviewUpdate.newId) {
 						review[1].upvotes = reviewUpdate.newUpvotes;
-						//arrPos = counter;
 					}
 				});
 				currReviews.oldest.forEach((review) => {
@@ -282,7 +279,6 @@ export const Nav = () => {
 						review[1].upvotes = reviewUpdate.newUpvotes;
 				});
 
-				//let newPage = Math.ceil(arrPos / maxPerPage);
 				setReviewUpdate((update) => ({ ...update, changed: false }));
 				pageChange(pageRef.current);
 			}
@@ -372,6 +368,17 @@ export const Nav = () => {
 								<Tab
 									label="Privacy"
 									{...a11yProps(3)}
+									sx={{
+										color: "text.primary",
+										fontWeight: "bold",
+									}}
+									onClick={() =>
+										reviewPage && setReviewPage(null)
+									}
+								/>
+								<Tab
+									label="Profile"
+									{...a11yProps(4)}
 									sx={{
 										color: "text.primary",
 										fontWeight: "bold",
@@ -508,6 +515,9 @@ export const Nav = () => {
 						</TabPanel>
 						<TabPanel value={value} index={3}>
 							<Privacy />
+						</TabPanel>
+						<TabPanel value={value} index={4}>
+							<Profile />
 						</TabPanel>
 					</Box>
 				</Container>
