@@ -216,10 +216,38 @@ export const Nav = () => {
 		const downvote = upvotes - 1;
 		if (vote === "up") {
 			await updateDoc(review, { upvotes: upvote });
-			setReviewUpdate({ newId: id, newUpvotes: upvote, changed: true });
-		} else {
+			setReviewUpdate((...prevState) => ({
+				newId: id,
+				newUpvotes: upvote,
+				changed: true,
+			}));
+			return;
+		} else if (vote === "down") {
 			await updateDoc(review, { upvotes: downvote });
-			setReviewUpdate({ newId: id, newUpvotes: downvote, changed: true });
+			setReviewUpdate((...prevState) => ({
+				newId: id,
+				newUpvotes: downvote,
+				changed: true,
+			}));
+			return;
+		}
+
+		if (vote === "revert-up") {
+			await updateDoc(review, { upvotes: upvotes - 1 });
+			setReviewUpdate((...prevState) => ({
+				newId: id,
+				newUpvotes: upvotes - 1,
+				changed: true,
+			}));
+			return;
+		} else if (vote === "revert-down") {
+			await updateDoc(review, { upvotes: upvotes + 1 });
+			setReviewUpdate((...prevState) => ({
+				newId: id,
+				newUpvotes: upvotes + 1,
+				changed: true,
+			}));
+			return;
 		}
 	};
 

@@ -8,6 +8,7 @@ import { Stack, CardActionArea, useTheme } from "@mui/material";
 import { IconButton } from "@mui/material";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 
 import { useState } from "react";
 
@@ -22,25 +23,58 @@ const CardInfo = ({
 	id,
 	theme,
 }) => {
-	//const theme = useTheme();
+	const [upvoted, setUpvoted] = useState(false);
+	const [downvoted, setDownvoted] = useState(false);
 	return (
 		<Box display="flex">
 			<CardActions sx={{ alignSelf: "flex-start" }}>
 				<Stack textAlign="center">
 					<IconButton
 						onClick={() => {
-							upvoteHandler("up", id, upvotes);
+							if (downvoted) {
+								setDownvoted(false);
+								setUpvoted(true);
+								upvoteHandler("revert-down", id, upvotes + 1);
+							} else if (upvoted === false) {
+								setUpvoted(true);
+								upvoteHandler("up", id, upvotes);
+							} else {
+								setUpvoted(false);
+								upvoteHandler("revert-up", id, upvotes);
+							}
 						}}
 					>
-						<ArrowCircleUpIcon></ArrowCircleUpIcon>
+						{!upvoted ? (
+							<ArrowCircleUpIcon />
+						) : (
+							<ArrowCircleRightIcon
+								sx={{ transform: "rotate(-.25turn)" }}
+							/>
+						)}
 					</IconButton>
 					<Typography fontWeight="bold">{upvotes}</Typography>
 					<IconButton
 						onClick={() => {
-							upvoteHandler("down", id, upvotes);
+							if (upvoted) {
+								setUpvoted(false);
+								setDownvoted(true);
+								upvoteHandler("revert-up", id, upvotes - 1);
+							} else if (downvoted === false) {
+								setDownvoted(true);
+								upvoteHandler("down", id, upvotes);
+							} else {
+								setDownvoted(false);
+								upvoteHandler("revert-down", id, upvotes);
+							}
 						}}
 					>
-						<ArrowCircleDownIcon></ArrowCircleDownIcon>
+						{!downvoted ? (
+							<ArrowCircleDownIcon />
+						) : (
+							<ArrowCircleRightIcon
+								sx={{ transform: "rotate(.25turn)" }}
+							/>
+						)}
 					</IconButton>
 				</Stack>
 			</CardActions>

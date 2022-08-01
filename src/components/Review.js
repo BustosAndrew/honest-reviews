@@ -7,6 +7,7 @@ import { Stack, useTheme } from "@mui/material";
 import { IconButton, Link } from "@mui/material";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
+import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 
 import { useState } from "react";
 
@@ -18,8 +19,12 @@ const CardInfo = ({
 	upvotes,
 	upvoteHandler,
 	id,
+	isUpvoted,
+	isDownvoted,
 }) => {
 	const [currUpvotes, setCurrUpvotes] = useState(upvotes);
+	const [upvoted, setUpvoted] = useState(false);
+	const [downvoted, setDownvoted] = useState(false);
 	return (
 		<div style={{ display: "flex" }}>
 			<CardActions
@@ -30,20 +35,56 @@ const CardInfo = ({
 				<Stack textAlign="center">
 					<IconButton
 						onClick={() => {
-							upvoteHandler("up", id, currUpvotes);
-							setCurrUpvotes(currUpvotes + 1);
+							if (downvoted) {
+								setDownvoted(false);
+								setUpvoted(true);
+								upvoteHandler("revert-down", id, upvotes + 1);
+								setCurrUpvotes(currUpvotes + 2);
+							} else if (upvoted === false) {
+								setUpvoted(true);
+								upvoteHandler("up", id, upvotes);
+								setCurrUpvotes(currUpvotes + 1);
+							} else {
+								setUpvoted(false);
+								upvoteHandler("revert-up", id, upvotes);
+								setCurrUpvotes(currUpvotes - 1);
+							}
 						}}
 					>
-						<ArrowCircleUpIcon></ArrowCircleUpIcon>
+						{!upvoted ? (
+							<ArrowCircleUpIcon />
+						) : (
+							<ArrowCircleRightIcon
+								sx={{ transform: "rotate(-.25turn)" }}
+							/>
+						)}
 					</IconButton>
 					<Typography fontWeight="bold">{currUpvotes}</Typography>
 					<IconButton
 						onClick={() => {
-							upvoteHandler("down", id, currUpvotes);
-							setCurrUpvotes(currUpvotes - 1);
+							if (upvoted) {
+								setUpvoted(false);
+								setDownvoted(true);
+								upvoteHandler("revert-up", id, upvotes - 1);
+								setCurrUpvotes(currUpvotes - 2);
+							} else if (downvoted === false) {
+								setDownvoted(true);
+								upvoteHandler("down", id, upvotes);
+								setCurrUpvotes(currUpvotes - 1);
+							} else {
+								setDownvoted(false);
+								upvoteHandler("revert-down", id, upvotes);
+								setCurrUpvotes(currUpvotes + 1);
+							}
 						}}
 					>
-						<ArrowCircleDownIcon></ArrowCircleDownIcon>
+						{!downvoted ? (
+							<ArrowCircleDownIcon />
+						) : (
+							<ArrowCircleRightIcon
+								sx={{ transform: "rotate(.25turn)" }}
+							/>
+						)}
 					</IconButton>
 				</Stack>
 			</CardActions>
@@ -77,6 +118,8 @@ export const Review = ({
 	upvotes,
 	id,
 	upvoteHandler,
+	isUpvoted,
+	isDownvoted,
 }) => {
 	const theme = useTheme();
 	return (
@@ -103,6 +146,8 @@ export const Review = ({
 					upvotes={upvotes}
 					upvoteHandler={upvoteHandler}
 					id={id}
+					isUpvoted={isUpvoted}
+					isDownvoted={isDownvoted}
 				/>
 			</Card>
 		</Box>

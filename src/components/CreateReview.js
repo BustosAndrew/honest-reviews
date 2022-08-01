@@ -17,7 +17,7 @@ import MuiAlert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 
 import { collection, addDoc, getDocs } from "firebase/firestore";
-import { useState, forwardRef, useEffect } from "react";
+import { useState, forwardRef } from "react";
 import * as ls from "local-storage";
 
 const Alert = forwardRef(function Alert(props, ref) {
@@ -142,9 +142,7 @@ export const CreateReview = ({ createReview, db, ip }) => {
 		}
 	};
 
-	useEffect(() => {
-		ls.set("choice", false);
-	}, []);
+	//useEffect(() => {}, []);
 
 	return (
 		<Box

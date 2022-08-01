@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 
-export const Signup = ({ pageHandler, app }) => {
+export const Signup = ({ pageHandler, app, userHandler }) => {
 	const [email, setEmail] = useState("");
 	const [pw, setPw] = useState("");
 
@@ -14,6 +14,8 @@ export const Signup = ({ pageHandler, app }) => {
 			.then((userCredential) => {
 				// Signed in
 				const user = userCredential.user;
+				console.log(user);
+				userHandler(user);
 				// ...
 			})
 			.catch((error) => {
@@ -24,7 +26,7 @@ export const Signup = ({ pageHandler, app }) => {
 	};
 
 	return (
-		<Stack spacing={4}>
+		<>
 			<Typography color="primary" variant="h5" fontWeight="bold">
 				Sign Up
 			</Typography>
@@ -33,26 +35,30 @@ export const Signup = ({ pageHandler, app }) => {
 				label="Email"
 				value={email}
 				onChange={(event) => setEmail(event.target.value)}
+				fullWidth={true}
 			/>
 			<TextField
 				// id="outlined-error-helper-text"
 				label="Password"
 				value={pw}
 				onChange={(event) => setPw(event.target.value)}
+				fullWidth={true}
 			/>
-			<Stack direction="row" justifyContent="space-between">
-				<Button variant="contained" sx={{ width: 0.4 }}>
-					Sign Up
-				</Button>
-				<Typography m={1}>OR</Typography>
-				<Button
-					variant="outlined"
-					onClick={pageHandler}
-					sx={{ width: 0.4 }}
-				>
-					Login
-				</Button>
-			</Stack>
-		</Stack>
+			<Button
+				onClick={submitHandler}
+				variant="contained"
+				sx={{ width: "8rem" }}
+			>
+				Sign Up
+			</Button>
+			<Typography>OR</Typography>
+			<Button
+				variant="outlined"
+				onClick={pageHandler}
+				sx={{ width: "8rem" }}
+			>
+				Login
+			</Button>
+		</>
 	);
 };
