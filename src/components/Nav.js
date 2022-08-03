@@ -124,6 +124,7 @@ export const Nav = () => {
 	const [loading, setLoading] = useState(true);
 	const [ip, setIP] = useState("");
 	const [mode, setMode] = useState("light");
+	//const elemRef = useRef(null);
 	const colorMode = useMemo(
 		() => ({
 			toggleColorMode: () => {
@@ -327,6 +328,16 @@ export const Nav = () => {
 		}
 	}, [filter, reviewUpdate, reviews, pageChange, ip]);
 
+	// useEffect(() => {
+	// 	//let yTop =
+	// 	// 	window.innerHeight - elemRef.current.getBoundingClientRect().top;
+	// 	onscroll = () => {
+	// 		let currScrollYPos = window.innerHeight - window.scrollY;
+	// 		//console.log("tabs y top pos: " + currScrollYPos);
+	// 		console.log("scroll y pos: " + currScrollYPos);
+	// 	};
+	// }, []);
+
 	return (
 		<ColorModeContext.Provider value={colorMode}>
 			<ThemeProvider theme={theme}>
@@ -341,7 +352,11 @@ export const Nav = () => {
 							Honest Reviews
 						</Typography>
 						<ToggleDarkMode />
-						<Box display="flex" justifyContent="center">
+						<Box
+							//ref={elemRef}
+							display="flex"
+							justifyContent="center"
+						>
 							<Tabs
 								value={value}
 								onChange={handleChange}
