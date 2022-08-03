@@ -148,7 +148,8 @@ export const CreateReview = ({ createReview, db, ip }) => {
 		try {
 			url = new URL(urlString);
 		} catch (e) {
-			return setIsValid(false);
+			setIsValid(false);
+			return;
 		}
 
 		if (url.protocol === "http:" || url.protocol === "https:") {
@@ -157,9 +158,11 @@ export const CreateReview = ({ createReview, db, ip }) => {
 			})
 				.then(() => {
 					setIsValid(true);
+					return;
 				})
 				.catch(() => {
 					setIsValid(false);
+					return;
 				});
 		} else setIsValid(false);
 	};
