@@ -35,7 +35,7 @@ export const Profile = ({ app }) => {
 	};
 
 	return (
-		<Stack alignItems="center" spacing={2} width={0.7} marginX="auto">
+		<Stack alignItems="center" spacing={2} marginX="auto">
 			{user && <Signout signoutHandler={signoutHandler} />}
 			{!user && loggingIn && (
 				<Login
