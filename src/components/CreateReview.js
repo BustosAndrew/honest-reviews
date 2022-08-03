@@ -148,7 +148,7 @@ export const CreateReview = ({ createReview, db, ip }) => {
 		try {
 			url = new URL(urlString);
 		} catch (e) {
-			return false;
+			return setIsValid(false);
 		}
 
 		if (url.protocol === "http:" || url.protocol === "https:") {
