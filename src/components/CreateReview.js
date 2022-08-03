@@ -26,7 +26,7 @@ const Alert = forwardRef(function Alert(props, ref) {
 
 export const CreateReview = ({ createReview, db, ip }) => {
 	const [username, setUsername] = useState("");
-	const [link, setLink] = useState("https://");
+	const [link, setLink] = useState("");
 	const [caption, setCaption] = useState("");
 	const [checked, setChecked] = useState(false);
 	const [open, setOpen] = useState(false);
@@ -38,6 +38,7 @@ export const CreateReview = ({ createReview, db, ip }) => {
 	});
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [choice, setChoice] = useState(false);
+	const [isValid, setIsValid] = useState(false);
 
 	const handleClose = (event, reason) => {
 		if (reason === "clickaway") return;
@@ -108,7 +109,7 @@ export const CreateReview = ({ createReview, db, ip }) => {
 
 	const submitHandler = (event) => {
 		event.preventDefault();
-		if (!link || !caption || !username) {
+		if (!link || !isValid || !caption || !username) {
 			setOpenError((openError) => ({
 				...openError,
 				missingInfo: true,
@@ -142,7 +143,26 @@ export const CreateReview = ({ createReview, db, ip }) => {
 		}
 	};
 
-	//useEffect(() => {}, []);
+	const isValidUrl = async (urlString) => {
+		let url;
+		try {
+			url = new URL(urlString);
+		} catch (e) {
+			return false;
+		}
+
+		if (url.protocol === "http:" || url.protocol === "https:") {
+			fetch(url, {
+				mode: "no-cors",
+			})
+				.then(() => {
+					setIsValid(true);
+				})
+				.catch(() => {
+					setIsValid(false);
+				});
+		} else setIsValid(false);
+	};
 
 	return (
 		<Box
@@ -170,13 +190,17 @@ export const CreateReview = ({ createReview, db, ip }) => {
 					onChange={(event) => setUsername(event.target.value)}
 				/>
 				<TextField
-					error={!link}
+					error={!isValid || !link}
 					// id="outlined-error-helper-text"
 					label="Enter the link of the product/service at issue"
-					helperText=""
+					helperText={!isValid && "You must enter a valid link"}
 					required
 					value={link}
-					onChange={(event) => setLink(event.target.value)}
+					onChange={(event) => {
+						const url = event.target.value;
+						setLink(url);
+						isValidUrl(url);
+					}}
 				/>
 				<TextField
 					error={!caption}
@@ -279,7 +303,7 @@ export const CreateReview = ({ createReview, db, ip }) => {
 						sx={{ width: "100%" }}
 					>
 						{(openError.missingInfo &&
-							"You can't leave any field empty!") ||
+							"You must clear all errors!") ||
 							(!openError.checked &&
 								"You must select the checkbox!") ||
 							(openError.fail && "Error: " + openError.message)}
