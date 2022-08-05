@@ -25,6 +25,7 @@ import {
 	useCallback,
 	useRef,
 	useMemo,
+	useContext,
 } from "react";
 import { ReviewItem } from "./ReviewItem";
 import { About } from "./About";
@@ -34,29 +35,10 @@ import { Review } from "./Review";
 import { Privacy } from "./Privacy";
 import { ToggleDarkMode, ColorModeContext } from "./ToggleDarkMode";
 import { Profile } from "./Profile";
+import { FirebaseContext } from "./FirebaseProvider";
 
-import { initializeApp } from "firebase/app";
-import {
-	collection,
-	doc,
-	getDocs,
-	getFirestore,
-	updateDoc,
-} from "firebase/firestore";
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-	apiKey: "AIzaSyAH7u9gRSiL-8B211-Kjh2dmUrkw7gIuac",
-	authDomain: "honestreviews-492ea.firebaseapp.com",
-	projectId: "honestreviews-492ea",
-	storageBucket: "honestreviews-492ea.appspot.com",
-	messagingSenderId: "260627698277",
-	appId: "1:260627698277:web:cdd642ed44c946e2362c8c",
-};
-
-// Initialize Firebase/firestore
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
+import { AuthContext } from "./AuthProvider";
 
 const TabPanel = (props) => {
 	const { children, value, index, ...other } = props;
@@ -148,6 +130,10 @@ export const Nav = () => {
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
 
+	const { myFS } = useContext(FirebaseContext);
+	const { profile } = useContext(AuthContext);
+	const db = myFS;
+
 	const handlerFilter = (event) => {
 		pageRef.current = 1;
 		setPage(1);
@@ -159,12 +145,12 @@ export const Nav = () => {
 		if (newValue !== 0) setNewReview(false);
 	};
 
-	const reviewHandler = (date, caption, username, link, upvotes, id) => {
+	const reviewHandler = (date, caption, title, link, upvotes, id) => {
 		const renderPage = (
 			<Review
 				date={date}
 				caption={caption}
-				username={username}
+				title={title}
 				link={link}
 				upvotes={upvotes}
 				upvoteHandler={upvoteHandler}
@@ -203,21 +189,31 @@ export const Nav = () => {
 	);
 
 	const createReview = () => {
+		if (!profile) {
+			setNewReview(false);
+			setValue(4);
+			return;
+		}
 		setNewReview(!newReview);
 	};
 
-	const getReviews = async () => {
+	const getReviews = useCallback(async () => {
 		const querySnapshot = await getDocs(collection(db, "reviews"));
 		return querySnapshot;
-	};
+	}, [db]);
 
 	const upvoteHandler = async (vote, id, upvotes) => {
+		if (!profile) {
+			setValue(4);
+			setReviewPage(null);
+			return;
+		}
 		const review = doc(db, "reviews", id);
 		const upvote = upvotes + 1;
 		const downvote = upvotes - 1;
 		if (vote === "up") {
 			await updateDoc(review, { upvotes: upvote });
-			setReviewUpdate((...prevState) => ({
+			setReviewUpdate(() => ({
 				newId: id,
 				newUpvotes: upvote,
 				changed: true,
@@ -225,7 +221,7 @@ export const Nav = () => {
 			return;
 		} else if (vote === "down") {
 			await updateDoc(review, { upvotes: downvote });
-			setReviewUpdate((...prevState) => ({
+			setReviewUpdate(() => ({
 				newId: id,
 				newUpvotes: downvote,
 				changed: true,
@@ -235,7 +231,7 @@ export const Nav = () => {
 
 		if (vote === "revert-up") {
 			await updateDoc(review, { upvotes: upvotes - 1 });
-			setReviewUpdate((...prevState) => ({
+			setReviewUpdate(() => ({
 				newId: id,
 				newUpvotes: upvotes - 1,
 				changed: true,
@@ -243,7 +239,7 @@ export const Nav = () => {
 			return;
 		} else if (vote === "revert-down") {
 			await updateDoc(review, { upvotes: upvotes + 1 });
-			setReviewUpdate((...prevState) => ({
+			setReviewUpdate(() => ({
 				newId: id,
 				newUpvotes: upvotes + 1,
 				changed: true,
@@ -326,7 +322,7 @@ export const Nav = () => {
 					data: currReviews.oldest.slice(0, maxPerPage),
 				});
 		}
-	}, [filter, reviewUpdate, reviews, pageChange, ip]);
+	}, [filter, reviewUpdate, reviews, pageChange, ip, getReviews]);
 
 	// useEffect(() => {
 	// 	//let yTop =
@@ -499,7 +495,7 @@ export const Nav = () => {
 											return (
 												<ReviewItem
 													date={val[1].created}
-													username={val[1].username}
+													title={val[1].title}
 													link={val[1].link}
 													caption={val[1].caption}
 													upvotes={val[1].upvotes}
@@ -508,7 +504,7 @@ export const Nav = () => {
 														reviewHandler(
 															val[1].created,
 															val[1].caption,
-															val[1].username,
+															val[1].title,
 															val[1].link,
 															val[1].upvotes,
 															val[0]
@@ -544,7 +540,6 @@ export const Nav = () => {
 							)}
 							{newReview && (
 								<CreateReview
-									db={db}
 									createReview={createReview}
 									ip={ip}
 								/>

@@ -1,27 +1,18 @@
 import { TextField, Typography, Button } from "@mui/material";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "./AuthProvider";
 
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-
-export const Login = ({ pageHandler, app, userHandler }) => {
-	const [email, setEmail] = useState("");
+export const Login = ({ pageHandler, signedInHandler }) => {
+	const [username, setUsername] = useState("");
 	const [pw, setPw] = useState("");
+	const { login } = useContext(AuthContext);
 
-	const submitHandler = () => {
-		const auth = getAuth(app);
-		signInWithEmailAndPassword(auth, email, pw)
-			.then((userCredential) => {
-				// Signed in
-				const user = userCredential.user;
-				console.log(user);
-				userHandler(user);
-				// ...
-			})
-			.catch((error) => {
-				// const errorCode = error.code;
-				// const errorMessage = error.message;
-			});
+	const submitHandler = async () => {
+		let success = await login(username, pw);
+
+		if (!success) console.log("login failed");
+		else signedInHandler();
 	};
 
 	return (
@@ -31,9 +22,9 @@ export const Login = ({ pageHandler, app, userHandler }) => {
 			</Typography>
 			<TextField
 				// id="outlined-error-helper-text"
-				label="Email"
-				value={email}
-				onChange={(event) => setEmail(event.target.value)}
+				label="Email/Username"
+				value={username}
+				onChange={(event) => setUsername(event.target.value)}
 				fullWidth={true}
 			/>
 			<TextField

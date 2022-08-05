@@ -16,16 +16,24 @@ import {
 import MuiAlert from "@mui/material/Alert";
 import Checkbox from "@mui/material/Checkbox";
 
-import { collection, addDoc, getDocs } from "firebase/firestore";
-import { useState, forwardRef } from "react";
+import { FirebaseContext } from "./FirebaseProvider";
+
+import {
+	collection,
+	addDoc,
+	getDocs,
+	serverTimestamp,
+} from "firebase/firestore";
+import { useState, forwardRef, useContext } from "react";
 import * as ls from "local-storage";
+import { AuthContext } from "./AuthProvider";
 
 const Alert = forwardRef(function Alert(props, ref) {
 	return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
-export const CreateReview = ({ createReview, db, ip }) => {
-	const [username, setUsername] = useState("");
+export const CreateReview = ({ createReview, ip }) => {
+	const [title, setTitle] = useState("");
 	const [link, setLink] = useState("");
 	const [caption, setCaption] = useState("");
 	const [checked, setChecked] = useState(false);
@@ -39,6 +47,9 @@ export const CreateReview = ({ createReview, db, ip }) => {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [choice, setChoice] = useState(false);
 	const [isValid, setIsValid] = useState(false);
+	const { myFS } = useContext(FirebaseContext);
+	const { profile } = useContext(AuthContext);
+	const db = myFS;
 
 	const handleClose = (event, reason) => {
 		if (reason === "clickaway") return;
@@ -83,10 +94,10 @@ export const CreateReview = ({ createReview, db, ip }) => {
 
 		// Add a new document in collection "reviews"
 		await addDoc(collection(db, "reviews"), {
-			username: username,
+			title: title,
 			link: link,
 			caption: caption,
-			created: new Date().getTime(),
+			created: serverTimestamp(),
 			upvotes: 1,
 		});
 	};
@@ -101,7 +112,7 @@ export const CreateReview = ({ createReview, db, ip }) => {
 		if (ipExists) return;
 
 		await addDoc(collection(db, "ips"), {
-			username: username,
+			username: profile.displayName,
 			ipv4: ip,
 			banned: false,
 		});
@@ -109,7 +120,12 @@ export const CreateReview = ({ createReview, db, ip }) => {
 
 	const submitHandler = (event) => {
 		event.preventDefault();
-		if (!link || !isValid || !caption || !username) {
+		if (!profile) {
+			createReview();
+			return;
+		}
+
+		if (!link || !isValid || !caption || !title) {
 			setOpenError((openError) => ({
 				...openError,
 				missingInfo: true,
@@ -184,13 +200,13 @@ export const CreateReview = ({ createReview, db, ip }) => {
 		>
 			<Box>
 				<TextField
-					error={!username}
+					error={!title}
 					// id="outlined-error-helper-text"
-					label="Enter your username"
+					label="Review title"
 					helperText=""
 					required
-					value={username}
-					onChange={(event) => setUsername(event.target.value)}
+					value={title}
+					onChange={(event) => setTitle(event.target.value)}
 				/>
 				<TextField
 					error={!isValid || !link}
@@ -199,9 +215,9 @@ export const CreateReview = ({ createReview, db, ip }) => {
 					helperText={!isValid && "You must enter a valid link"}
 					required
 					value={link}
-					onChange={(event) => {
+					onChange={(event) => setLink(event.target.value)}
+					onBlur={(event) => {
 						const url = event.target.value;
-						setLink(url);
 						isValidUrl(url);
 					}}
 				/>

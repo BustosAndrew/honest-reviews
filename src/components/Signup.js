@@ -1,28 +1,20 @@
 import { TextField, Typography, Button } from "@mui/material";
+import { AuthContext } from "./AuthProvider";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
 
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-
-export const Signup = ({ pageHandler, app, userHandler }) => {
+export const Signup = ({ pageHandler }) => {
 	const [email, setEmail] = useState("");
+	const [username, setUsername] = useState("");
 	const [pw, setPw] = useState("");
+	const { register } = useContext(AuthContext);
 
-	const submitHandler = () => {
-		const auth = getAuth(app);
-		createUserWithEmailAndPassword(auth, email, pw)
-			.then((userCredential) => {
-				// Signed in
-				const user = userCredential.user;
-				console.log(user);
-				userHandler(user);
-				// ...
-			})
-			.catch((error) => {
-				// const errorCode = error.code;
-				// const errorMessage = error.message;
-				// ..
-			});
+	const submitHandler = async () => {
+		let success = await register(email, pw, username);
+
+		if (!success) {
+			console.log("Registration failed!");
+		} else pageHandler();
 	};
 
 	return (
@@ -35,6 +27,13 @@ export const Signup = ({ pageHandler, app, userHandler }) => {
 				label="Email"
 				value={email}
 				onChange={(event) => setEmail(event.target.value)}
+				fullWidth={true}
+			/>
+			<TextField
+				// id="outlined-error-helper-text"
+				label="Username"
+				value={username}
+				onChange={(event) => setUsername(event.target.value)}
 				fullWidth={true}
 			/>
 			<TextField

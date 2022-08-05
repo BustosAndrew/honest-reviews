@@ -9,11 +9,12 @@ import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { AuthContext } from "./AuthProvider";
 
 const CardInfo = ({
 	date,
-	username,
+	title,
 	caption,
 	link,
 	upvotes,
@@ -25,6 +26,8 @@ const CardInfo = ({
 	const [currUpvotes, setCurrUpvotes] = useState(upvotes);
 	const [upvoted, setUpvoted] = useState(false);
 	const [downvoted, setDownvoted] = useState(false);
+	const { profile } = useContext(AuthContext);
+
 	return (
 		<div style={{ display: "flex" }}>
 			<CardActions
@@ -95,10 +98,13 @@ const CardInfo = ({
 						color="text.secondary"
 						gutterBottom
 					>
-						Time submitted: {date} ms
+						{date.toDate().toString()}
+					</Typography>
+					<Typography variant="body1">
+						Reviewed by: {profile.displayName}
 					</Typography>
 					<Typography variant="h5" component="div">
-						{username}
+						{title}
 					</Typography>
 					<Link href={link} sx={{ mb: 1.5 }}>
 						{link}
@@ -114,7 +120,7 @@ export const Review = ({
 	date,
 	caption,
 	link,
-	username,
+	title,
 	upvotes,
 	id,
 	upvoteHandler,
@@ -141,7 +147,7 @@ export const Review = ({
 				<CardInfo
 					date={date}
 					caption={caption}
-					username={username}
+					title={title}
 					link={link}
 					upvotes={upvotes}
 					upvoteHandler={upvoteHandler}
