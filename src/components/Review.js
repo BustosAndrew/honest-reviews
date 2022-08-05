@@ -9,13 +9,13 @@ import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 
-import { useState, useContext } from "react";
-import { AuthContext } from "./AuthProvider";
+import { useState } from "react";
 
 const CardInfo = ({
 	date,
 	title,
 	caption,
+	reviewer,
 	link,
 	upvotes,
 	upvoteHandler,
@@ -26,7 +26,6 @@ const CardInfo = ({
 	const [currUpvotes, setCurrUpvotes] = useState(upvotes);
 	const [upvoted, setUpvoted] = useState(false);
 	const [downvoted, setDownvoted] = useState(false);
-	const { profile } = useContext(AuthContext);
 
 	return (
 		<div style={{ display: "flex" }}>
@@ -101,7 +100,7 @@ const CardInfo = ({
 						{date.toDate().toString()}
 					</Typography>
 					<Typography variant="body1">
-						Reviewed by: {profile.displayName}
+						Reviewed by: {reviewer}
 					</Typography>
 					<Typography variant="h5" component="div">
 						{title}
@@ -119,6 +118,7 @@ const CardInfo = ({
 export const Review = ({
 	date,
 	caption,
+	reviewer,
 	link,
 	title,
 	upvotes,
@@ -147,6 +147,7 @@ export const Review = ({
 				<CardInfo
 					date={date}
 					caption={caption}
+					reviewer={reviewer}
 					title={title}
 					link={link}
 					upvotes={upvotes}

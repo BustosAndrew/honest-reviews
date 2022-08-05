@@ -145,13 +145,22 @@ export const Nav = () => {
 		if (newValue !== 0) setNewReview(false);
 	};
 
-	const reviewHandler = (date, caption, title, link, upvotes, id) => {
+	const reviewHandler = (
+		date,
+		reviewer,
+		caption,
+		title,
+		link,
+		upvotes,
+		id
+	) => {
 		const renderPage = (
 			<Review
 				date={date}
 				caption={caption}
 				title={title}
 				link={link}
+				reviewer={reviewer}
 				upvotes={upvotes}
 				upvoteHandler={upvoteHandler}
 				id={id}
@@ -495,6 +504,7 @@ export const Nav = () => {
 											return (
 												<ReviewItem
 													date={val[1].created}
+													reviewer={val[1].reviewer}
 													title={val[1].title}
 													link={val[1].link}
 													caption={val[1].caption}
@@ -503,6 +513,7 @@ export const Nav = () => {
 													reviewHandler={() =>
 														reviewHandler(
 															val[1].created,
+															val[1].reviewer,
 															val[1].caption,
 															val[1].title,
 															val[1].link,

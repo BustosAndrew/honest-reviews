@@ -95,6 +95,7 @@ export const CreateReview = ({ createReview, ip }) => {
 		// Add a new document in collection "reviews"
 		await addDoc(collection(db, "reviews"), {
 			title: title,
+			reviewer: profile.displayName,
 			link: link,
 			caption: caption,
 			created: serverTimestamp(),
