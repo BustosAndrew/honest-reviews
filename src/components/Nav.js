@@ -412,7 +412,7 @@ export const Nav = () => {
 		getUpvoteHistory();
 
 		const unsubscribe = onSnapshot(collection(db, "reviews"), (res) => {
-			//for (const doc of res.docs) console.log(doc.data());
+			for (const doc of res.docs) console.log(doc.data());
 			if (reviewUpdate) {
 				if (reviewUpdate.changed) {
 					setReviewUpdate((update) => ({
