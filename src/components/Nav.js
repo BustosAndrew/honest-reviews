@@ -379,18 +379,37 @@ export const Nav = () => {
 			}
 			pageChange(pageRef.current);
 		} else {
-			// getting newest created
-			if (filter === "newest")
+			if (filter === "newest") currReviews = reviews.newest;
+			else currReviews = reviews.oldest;
+
+			if (!currReviews[pageRef.current * maxPerPage - 1]) {
 				dispatch({
 					type: ACTIONS.SET_REVIEW_ITEMS,
-					data: currReviews.newest.slice(0, maxPerPage),
+					data: currReviews.slice(
+						pageRef.current * maxPerPage - maxPerPage,
+						currReviews.length
+					),
 				});
-			// getting oldest created
-			else if (filter === "oldest")
+			} else {
+				let arrPos = pageRef.current * maxPerPage - maxPerPage;
+				if (arrPos < 0) arrPos = 0;
+
 				dispatch({
 					type: ACTIONS.SET_REVIEW_ITEMS,
-					data: currReviews.oldest.slice(0, maxPerPage),
+					data: currReviews.slice(arrPos, arrPos + maxPerPage),
 				});
+			}
+
+			// if (filter === "newest")
+			// 	dispatch({
+			// 		type: ACTIONS.SET_REVIEW_ITEMS,
+			// 		data: currReviews.newest.slice(0, maxPerPage),
+			// 	});
+			// else if (filter === "oldest")
+			// 	dispatch({
+			// 		type: ACTIONS.SET_REVIEW_ITEMS,
+			// 		data: currReviews.oldest.slice(0, maxPerPage),
+			// 	});
 		}
 	}, [filter, reviewUpdate, reviews, pageChange, ip, getReviews]);
 
@@ -412,7 +431,19 @@ export const Nav = () => {
 		getUpvoteHistory();
 
 		const unsubscribe = onSnapshot(collection(db, "reviews"), (res) => {
-			for (const doc of res.docs) console.log(doc.data());
+			let reviews = [];
+			for (const doc of res.docs) reviews.push([doc.id, doc.data()]);
+			//console.log(reviews);
+			reviews.sort((a, b) => b[1].created - a[1].created); // getting newest created
+			let oldestReviews = [...reviews];
+			oldestReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest created
+
+			dispatch({
+				type: ACTIONS.SET_REVIEWS,
+				newest: reviews,
+				oldest: oldestReviews,
+			});
+
 			if (reviewUpdate) {
 				if (reviewUpdate.changed) {
 					setReviewUpdate((update) => ({
@@ -423,7 +454,7 @@ export const Nav = () => {
 			}
 		});
 		return unsubscribe;
-	}, [profile, db, reviewUpdate]);
+	}, [profile, db, reviewUpdate, filter]);
 
 	// useEffect(() => {
 	// 	//let yTop =
