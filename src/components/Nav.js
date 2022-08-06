@@ -256,8 +256,8 @@ export const Nav = () => {
 			let postVoted = false;
 			for (const review of upvoteHistory) {
 				if (review.postId === id) {
-					review.upvoted = vote === "up";
-					review.downvoted = vote === "down";
+					review.upvoted = vote === "up" || vote === "revert-down";
+					review.downvoted = vote === "down" || vote === "revert-up";
 					postVoted = true;
 				}
 			}
@@ -296,18 +296,18 @@ export const Nav = () => {
 		}
 
 		if (vote === "revert-up") {
-			await updateDoc(review, { upvotes: upvotes - 1 });
+			await updateDoc(review, { upvotes: upvotes });
 			setReviewUpdate(() => ({
 				newId: id,
-				newUpvotes: upvotes - 1,
+				newUpvotes: upvotes,
 				changed: true,
 			}));
 			return;
 		} else if (vote === "revert-down") {
-			await updateDoc(review, { upvotes: upvotes + 1 });
+			await updateDoc(review, { upvotes: upvotes });
 			setReviewUpdate(() => ({
 				newId: id,
-				newUpvotes: upvotes + 1,
+				newUpvotes: upvotes,
 				changed: true,
 			}));
 			return;

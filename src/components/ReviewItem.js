@@ -37,13 +37,13 @@ const CardInfo = ({
 							if (downvoted) {
 								setDownvoted(false);
 								setUpvoted(true);
-								upvoteHandler("revert-down", id, upvotes + 1);
+								upvoteHandler("revert-down", id, upvotes + 2);
 							} else if (upvoted === false) {
 								setUpvoted(true);
 								upvoteHandler("up", id, upvotes);
 							} else {
 								setUpvoted(false);
-								upvoteHandler("revert-up", id, upvotes);
+								upvoteHandler("revert-up", id, upvotes - 1);
 							}
 						}}
 					>
@@ -61,13 +61,13 @@ const CardInfo = ({
 							if (upvoted) {
 								setUpvoted(false);
 								setDownvoted(true);
-								upvoteHandler("revert-up", id, upvotes - 1);
+								upvoteHandler("revert-up", id, upvotes - 2);
 							} else if (downvoted === false) {
 								setDownvoted(true);
 								upvoteHandler("down", id, upvotes);
 							} else {
 								setDownvoted(false);
-								upvoteHandler("revert-down", id, upvotes);
+								upvoteHandler("revert-down", id, upvotes + 1);
 							}
 						}}
 					>

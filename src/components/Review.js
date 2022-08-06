@@ -40,7 +40,11 @@ const CardInfo = ({
 							if (downvoted) {
 								setDownvoted(false);
 								setUpvoted(true);
-								upvoteHandler("revert-down", id, upvotes + 1);
+								upvoteHandler(
+									"revert-down",
+									id,
+									currUpvotes + 2
+								);
 								setCurrUpvotes(currUpvotes + 2);
 							} else if (upvoted === false) {
 								setUpvoted(true);
@@ -48,7 +52,7 @@ const CardInfo = ({
 								setCurrUpvotes(currUpvotes + 1);
 							} else {
 								setUpvoted(false);
-								upvoteHandler("revert-up", id, upvotes);
+								upvoteHandler("revert-up", id, currUpvotes - 1);
 								setCurrUpvotes(currUpvotes - 1);
 							}
 						}}
@@ -67,7 +71,7 @@ const CardInfo = ({
 							if (upvoted) {
 								setUpvoted(false);
 								setDownvoted(true);
-								upvoteHandler("revert-up", id, upvotes - 1);
+								upvoteHandler("revert-up", id, currUpvotes - 2);
 								setCurrUpvotes(currUpvotes - 2);
 							} else if (downvoted === false) {
 								setDownvoted(true);
@@ -75,7 +79,11 @@ const CardInfo = ({
 								setCurrUpvotes(currUpvotes - 1);
 							} else {
 								setDownvoted(false);
-								upvoteHandler("revert-down", id, upvotes);
+								upvoteHandler(
+									"revert-down",
+									id,
+									currUpvotes + 1
+								);
 								setCurrUpvotes(currUpvotes + 1);
 							}
 						}}
