@@ -25,8 +25,8 @@ const CardInfo = ({
 	isDownvoted,
 	isUpvoted,
 }) => {
-	const [upvoted, setUpvoted] = useState(isUpvoted || false);
-	const [downvoted, setDownvoted] = useState(isDownvoted || false);
+	const [upvoted, setUpvoted] = useState(isUpvoted);
+	const [downvoted, setDownvoted] = useState(isDownvoted);
 
 	return (
 		<Box display="flex">
@@ -37,13 +37,25 @@ const CardInfo = ({
 							if (downvoted) {
 								setDownvoted(false);
 								setUpvoted(true);
-								upvoteHandler("revert-down", id, upvotes + 2);
+								upvoteHandler(
+									"revert-down",
+									id,
+									upvotes + 2,
+									true,
+									false
+								);
 							} else if (upvoted === false) {
 								setUpvoted(true);
-								upvoteHandler("up", id, upvotes);
+								upvoteHandler("up", id, upvotes, true, false);
 							} else {
 								setUpvoted(false);
-								upvoteHandler("revert-up", id, upvotes - 1);
+								upvoteHandler(
+									"revert-up",
+									id,
+									upvotes - 1,
+									false,
+									false
+								);
 							}
 						}}
 					>
@@ -61,13 +73,25 @@ const CardInfo = ({
 							if (upvoted) {
 								setUpvoted(false);
 								setDownvoted(true);
-								upvoteHandler("revert-up", id, upvotes - 2);
+								upvoteHandler(
+									"revert-up",
+									id,
+									upvotes - 2,
+									false,
+									true
+								);
 							} else if (downvoted === false) {
 								setDownvoted(true);
-								upvoteHandler("down", id, upvotes);
+								upvoteHandler("down", id, upvotes, false, true);
 							} else {
 								setDownvoted(false);
-								upvoteHandler("revert-down", id, upvotes + 1);
+								upvoteHandler(
+									"revert-down",
+									id,
+									upvotes + 1,
+									false,
+									false
+								);
 							}
 						}}
 					>

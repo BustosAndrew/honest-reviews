@@ -24,8 +24,8 @@ const CardInfo = ({
 	isDownvoted,
 }) => {
 	const [currUpvotes, setCurrUpvotes] = useState(upvotes);
-	const [upvoted, setUpvoted] = useState(isUpvoted || false);
-	const [downvoted, setDownvoted] = useState(isDownvoted || false);
+	const [upvoted, setUpvoted] = useState(isUpvoted);
+	const [downvoted, setDownvoted] = useState(isDownvoted);
 
 	return (
 		<div style={{ display: "flex" }}>
@@ -43,16 +43,30 @@ const CardInfo = ({
 								upvoteHandler(
 									"revert-down",
 									id,
-									currUpvotes + 2
+									currUpvotes + 2,
+									true,
+									false
 								);
 								setCurrUpvotes(currUpvotes + 2);
 							} else if (upvoted === false) {
 								setUpvoted(true);
-								upvoteHandler("up", id, upvotes);
+								upvoteHandler(
+									"up",
+									id,
+									currUpvotes,
+									true,
+									false
+								);
 								setCurrUpvotes(currUpvotes + 1);
 							} else {
 								setUpvoted(false);
-								upvoteHandler("revert-up", id, currUpvotes - 1);
+								upvoteHandler(
+									"revert-up",
+									id,
+									currUpvotes - 1,
+									false,
+									false
+								);
 								setCurrUpvotes(currUpvotes - 1);
 							}
 						}}
@@ -71,18 +85,32 @@ const CardInfo = ({
 							if (upvoted) {
 								setUpvoted(false);
 								setDownvoted(true);
-								upvoteHandler("revert-up", id, currUpvotes - 2);
+								upvoteHandler(
+									"revert-up",
+									id,
+									currUpvotes - 2,
+									false,
+									true
+								);
 								setCurrUpvotes(currUpvotes - 2);
 							} else if (downvoted === false) {
 								setDownvoted(true);
-								upvoteHandler("down", id, upvotes);
+								upvoteHandler(
+									"down",
+									id,
+									currUpvotes,
+									false,
+									true
+								);
 								setCurrUpvotes(currUpvotes - 1);
 							} else {
 								setDownvoted(false);
 								upvoteHandler(
 									"revert-down",
 									id,
-									currUpvotes + 1
+									currUpvotes + 1,
+									false,
+									false
 								);
 								setCurrUpvotes(currUpvotes + 1);
 							}

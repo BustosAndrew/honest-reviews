@@ -221,7 +221,7 @@ export const Nav = () => {
 		return querySnapshot;
 	}, [db]);
 
-	const upvoteHandler = async (vote, id, upvotes) => {
+	const upvoteHandler = async (vote, id, upvotes, upvoted, downvoted) => {
 		if (!profile) {
 			setValue(4);
 			setReviewPage(null);
@@ -242,8 +242,8 @@ export const Nav = () => {
 			let upvoteHistory = [
 				{
 					postId: id,
-					upvoted: vote === "up",
-					downvoted: vote === "down",
+					upvoted: upvoted,
+					downvoted: downvoted,
 				},
 			];
 
@@ -256,8 +256,8 @@ export const Nav = () => {
 			let postVoted = false;
 			for (const review of upvoteHistory) {
 				if (review.postId === id) {
-					review.upvoted = vote === "up" || vote === "revert-down";
-					review.downvoted = vote === "down" || vote === "revert-up";
+					review.upvoted = upvoted;
+					review.downvoted = downvoted;
 					postVoted = true;
 				}
 			}
@@ -265,8 +265,8 @@ export const Nav = () => {
 			if (!postVoted)
 				upvoteHistory.push({
 					postId: id,
-					upvoted: vote === "up",
-					downvoted: vote === "down",
+					upvoted: upvoted,
+					downvoted: downvoted,
 				});
 
 			await updateDoc(userVotesDoc.ref, {
@@ -410,7 +410,7 @@ export const Nav = () => {
 
 		getUpvoteHistory();
 		//console.log(userVotes);
-	}, [profile, db]);
+	}, [profile, db, reviewUpdate]);
 
 	// useEffect(() => {
 	// 	//let yTop =
@@ -597,22 +597,26 @@ export const Nav = () => {
 													}
 													id={val[0]}
 													isUpvoted={
-														userVotes &&
-														userVotes.postsUpvoted.find(
-															(post) =>
-																post.postId ===
-																	val[0] &&
-																post.upvoted
-														)
+														(userVotes &&
+															userVotes.postsUpvoted.find(
+																(post) =>
+																	post.postId ===
+																		val[0] &&
+																	post.upvoted
+															) &&
+															true) ||
+														false
 													}
 													isDownvoted={
-														userVotes &&
-														userVotes.postsUpvoted.find(
-															(post) =>
-																post.postId ===
-																	val[0] &&
-																post.downvoted
-														)
+														(userVotes &&
+															userVotes.postsUpvoted.find(
+																(post) =>
+																	post.postId ===
+																		val[0] &&
+																	post.downvoted
+															) &&
+															true) ||
+														false
 													}
 												/>
 											);
