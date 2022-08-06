@@ -43,6 +43,7 @@ import {
 	getDocs,
 	updateDoc,
 	addDoc,
+	onSnapshot,
 } from "firebase/firestore";
 import { AuthContext } from "./AuthProvider";
 
@@ -409,7 +410,19 @@ export const Nav = () => {
 		};
 
 		getUpvoteHistory();
-		//console.log(userVotes);
+
+		const unsubscribe = onSnapshot(collection(db, "reviews"), (res) => {
+			//for (const doc of res.docs) console.log(doc.data());
+			if (reviewUpdate) {
+				if (reviewUpdate.changed) {
+					setReviewUpdate((update) => ({
+						...update,
+						changed: false,
+					}));
+				}
+			}
+		});
+		return unsubscribe;
 	}, [profile, db, reviewUpdate]);
 
 	// useEffect(() => {
