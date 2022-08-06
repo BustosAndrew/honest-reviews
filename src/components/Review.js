@@ -24,8 +24,8 @@ const CardInfo = ({
 	isDownvoted,
 }) => {
 	const [currUpvotes, setCurrUpvotes] = useState(upvotes);
-	const [upvoted, setUpvoted] = useState(false);
-	const [downvoted, setDownvoted] = useState(false);
+	const [upvoted, setUpvoted] = useState(isUpvoted || false);
+	const [downvoted, setDownvoted] = useState(isDownvoted || false);
 
 	return (
 		<div style={{ display: "flex" }}>

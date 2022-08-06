@@ -22,9 +22,11 @@ const CardInfo = ({
 	upvotes,
 	upvoteHandler,
 	id,
+	isDownvoted,
+	isUpvoted,
 }) => {
-	const [upvoted, setUpvoted] = useState(false);
-	const [downvoted, setDownvoted] = useState(false);
+	const [upvoted, setUpvoted] = useState(isUpvoted || false);
+	const [downvoted, setDownvoted] = useState(isDownvoted || false);
 
 	return (
 		<Box display="flex">
@@ -88,7 +90,9 @@ const CardInfo = ({
 						title,
 						link,
 						upvotes,
-						id
+						id,
+						upvoted,
+						downvoted
 					)
 				}
 			>
@@ -128,6 +132,8 @@ export const ReviewItem = ({
 	upvotes,
 	upvoteHandler,
 	id,
+	isDownvoted,
+	isUpvoted,
 }) => {
 	const [raised, setRaised] = useState(false);
 	const theme = useTheme();
@@ -161,6 +167,8 @@ export const ReviewItem = ({
 					upvotes={upvotes}
 					upvoteHandler={upvoteHandler}
 					id={id}
+					isUpvoted={isUpvoted}
+					isDownvoted={isDownvoted}
 				/>
 			</Card>
 		</Box>

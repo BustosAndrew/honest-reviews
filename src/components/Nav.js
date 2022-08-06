@@ -37,7 +37,13 @@ import { ToggleDarkMode, ColorModeContext } from "./ToggleDarkMode";
 import { Profile } from "./Profile";
 import { FirebaseContext } from "./FirebaseProvider";
 
-import { collection, doc, getDocs, updateDoc } from "firebase/firestore";
+import {
+	collection,
+	doc,
+	getDocs,
+	updateDoc,
+	addDoc,
+} from "firebase/firestore";
 import { AuthContext } from "./AuthProvider";
 
 const TabPanel = (props) => {
@@ -72,7 +78,6 @@ function a11yProps(index) {
 const ACTIONS = {
 	SET_REVIEWS: "set_reviews",
 	SET_REVIEW_ITEMS: "set_review_items",
-	SET_PAGE: "set_page",
 };
 
 const initialState = {
@@ -106,6 +111,7 @@ export const Nav = () => {
 	const [loading, setLoading] = useState(true);
 	const [ip, setIP] = useState("");
 	const [mode, setMode] = useState("light");
+	const [userVotes, setUserVotes] = useState(null);
 	//const elemRef = useRef(null);
 	const colorMode = useMemo(
 		() => ({
@@ -152,7 +158,9 @@ export const Nav = () => {
 		title,
 		link,
 		upvotes,
-		id
+		id,
+		isUpvoted,
+		isDownvoted
 	) => {
 		const renderPage = (
 			<Review
@@ -164,6 +172,8 @@ export const Nav = () => {
 				upvotes={upvotes}
 				upvoteHandler={upvoteHandler}
 				id={id}
+				isUpvoted={isUpvoted}
+				isDownvoted={isDownvoted}
 			/>
 		);
 		setReviewPage(renderPage);
@@ -217,6 +227,53 @@ export const Nav = () => {
 			setReviewPage(null);
 			return;
 		}
+
+		let userVotesExists = false;
+		let userVotesDoc = null;
+		const querySnapshot = await getDocs(collection(db, "userVotes"));
+		querySnapshot.forEach((doc) => {
+			if (doc.data().displayName === profile.displayName) {
+				userVotesDoc = doc;
+				userVotesExists = true;
+			}
+		});
+
+		if (!userVotesExists) {
+			let upvoteHistory = [
+				{
+					postId: id,
+					upvoted: vote === "up",
+					downvoted: vote === "down",
+				},
+			];
+
+			await addDoc(collection(db, "userVotes"), {
+				displayName: profile.displayName,
+				postsUpvoted: upvoteHistory,
+			});
+		} else {
+			let upvoteHistory = [...userVotesDoc.data().postsUpvoted];
+			let postVoted = false;
+			for (const review of upvoteHistory) {
+				if (review.postId === id) {
+					review.upvoted = vote === "up";
+					review.downvoted = vote === "down";
+					postVoted = true;
+				}
+			}
+
+			if (!postVoted)
+				upvoteHistory.push({
+					postId: id,
+					upvoted: vote === "up",
+					downvoted: vote === "down",
+				});
+
+			await updateDoc(userVotesDoc.ref, {
+				postsUpvoted: upvoteHistory,
+			});
+		}
+
 		const review = doc(db, "reviews", id);
 		const upvote = upvotes + 1;
 		const downvote = upvotes - 1;
@@ -282,18 +339,21 @@ export const Nav = () => {
 					currReviews.push([doc.id, doc.data()]);
 				});
 
-				currReviews.sort((a, b) => b[1].created - a[1].created); // getting newest created
-				let oldestReviews = [];
+				if (!(currReviews.length === 0)) {
+					currReviews.sort((a, b) => b[1].created - a[1].created); // getting newest created
+					let oldestReviews = [];
 
-				for (const review of currReviews) oldestReviews.push(review);
-				oldestReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest created
+					for (const review of currReviews)
+						oldestReviews.push(review);
+					oldestReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest created
 
-				dispatch({
-					type: ACTIONS.SET_REVIEWS,
-					newest: currReviews,
-					oldest: oldestReviews,
-				});
-				setTimeout(() => setLoading(false), 500);
+					dispatch({
+						type: ACTIONS.SET_REVIEWS,
+						newest: currReviews,
+						oldest: oldestReviews,
+					});
+					setTimeout(() => setLoading(false), 500);
+				}
 			});
 		}
 
@@ -332,6 +392,24 @@ export const Nav = () => {
 				});
 		}
 	}, [filter, reviewUpdate, reviews, pageChange, ip, getReviews]);
+
+	useEffect(() => {
+		const getUpvoteHistory = async () => {
+			if (profile) {
+				const querySnapshot = await getDocs(
+					collection(db, "userVotes")
+				);
+				querySnapshot.forEach((doc) => {
+					if (doc.data().displayName === profile.displayName) {
+						//console.log(userVotesDoc);
+						setUserVotes(doc.data());
+					}
+				});
+			}
+		};
+
+		getUpvoteHistory();
+	});
 
 	// useEffect(() => {
 	// 	//let yTop =
@@ -510,21 +588,31 @@ export const Nav = () => {
 													caption={val[1].caption}
 													upvotes={val[1].upvotes}
 													key={indx}
-													reviewHandler={() =>
-														reviewHandler(
-															val[1].created,
-															val[1].reviewer,
-															val[1].caption,
-															val[1].title,
-															val[1].link,
-															val[1].upvotes,
-															val[0]
-														)
+													reviewHandler={
+														reviewHandler
 													}
 													upvoteHandler={
 														upvoteHandler
 													}
 													id={val[0]}
+													isUpvoted={
+														userVotes &&
+														userVotes.postsUpvoted.find(
+															(post) =>
+																post.postId ===
+																	val[0] &&
+																post.upvoted
+														)
+													}
+													isDownvoted={
+														userVotes &&
+														userVotes.postsUpvoted.find(
+															(post) =>
+																post.postId ===
+																	val[0] &&
+																post.downvoted
+														)
+													}
 												/>
 											);
 										})}
