@@ -136,7 +136,7 @@ export const Nav = () => {
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
 
-	const { myFS } = useContext(FirebaseContext);
+	const { myFS, myAuth } = useContext(FirebaseContext);
 	const { profile } = useContext(AuthContext);
 	const db = myFS;
 
@@ -409,7 +409,7 @@ export const Nav = () => {
 		};
 
 		getUpvoteHistory();
-	});
+	}, [profile, db]);
 
 	// useEffect(() => {
 	// 	//let yTop =
