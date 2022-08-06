@@ -405,10 +405,11 @@ export const Nav = () => {
 						setUserVotes(doc.data());
 					}
 				});
-			}
+			} else setUserVotes(null);
 		};
 
 		getUpvoteHistory();
+		//console.log(userVotes);
 	}, [profile, db]);
 
 	// useEffect(() => {
