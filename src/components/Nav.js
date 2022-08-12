@@ -1,21 +1,16 @@
-import PropTypes from "prop-types";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-import Typography from "@mui/material/Typography";
-import Box from "@mui/material/Box";
-import Stack from "@mui/material/Stack";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import CancelIcon from "@mui/icons-material/Cancel";
-import Container from "@mui/material/Container";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import { Pagination } from "@mui/material";
-import { CircularProgress } from "@mui/material";
-import SyncIcon from "@mui/icons-material/Sync";
-import { IconButton } from "@mui/material";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import {
+	CircularProgress,
+	IconButton,
+	Pagination,
+	Tabs,
+	Tab,
+	Typography,
+	Box,
+	Stack,
+	Container,
+} from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 
 import {
@@ -24,18 +19,21 @@ import {
 	useReducer,
 	useCallback,
 	useRef,
-	useMemo,
 	useContext,
 } from "react";
 import { ReviewItem } from "./ReviewItem";
 import { About } from "./About";
+import { Filter } from "./Filter";
 import { Contact } from "./Contact";
 import { CreateReview } from "./CreateReview";
 import { Review } from "./Review";
 import { Privacy } from "./Privacy";
-import { ToggleDarkMode, ColorModeContext } from "./ToggleDarkMode";
+import { ToggleDarkMode } from "./ToggleDarkMode";
 import { Profile } from "./Profile";
+import { TabPanel, a11yProps } from "./TabPanel";
 import { FirebaseContext } from "./FirebaseProvider";
+import { AuthContext } from "./AuthProvider";
+import { navReducer, initialState, ACTIONS } from "./navReducer";
 
 import {
 	collection,
@@ -45,60 +43,8 @@ import {
 	addDoc,
 	onSnapshot,
 } from "firebase/firestore";
-import { AuthContext } from "./AuthProvider";
 
-const TabPanel = (props) => {
-	const { children, value, index, ...other } = props;
-
-	return (
-		<div
-			role="tabpanel"
-			hidden={value !== index}
-			id={`simple-tabpanel-${index}`}
-			aria-labelledby={`simple-tab-${index}`}
-			{...other}
-		>
-			{value === index && <Box sx={{ p: 2 }}>{children}</Box>}
-		</div>
-	);
-};
-
-TabPanel.propTypes = {
-	children: PropTypes.node,
-	index: PropTypes.number.isRequired,
-	value: PropTypes.number.isRequired,
-};
-
-function a11yProps(index) {
-	return {
-		id: `simple-tab-${index}`,
-		"aria-controls": `simple-tabpanel-${index}`,
-	};
-}
-
-const ACTIONS = {
-	SET_REVIEWS: "set_reviews",
-	SET_REVIEW_ITEMS: "set_review_items",
-};
-
-const initialState = {
-	reviews: { newest: [], oldest: [] },
-	reviewItems: [],
-};
-
-const reducer = (state, action) => {
-	switch (action.type) {
-		case ACTIONS.SET_REVIEWS:
-			return {
-				...state,
-				reviews: { newest: action.newest, oldest: action.oldest },
-			};
-		case ACTIONS.SET_REVIEW_ITEMS:
-			return { ...state, reviewItems: action.data };
-		default:
-			throw new Error();
-	}
-};
+const tabStyle = { fontWeight: "bold", color: "text.primary" };
 
 export const Nav = () => {
 	const [value, setValue] = useState(0);
@@ -107,33 +53,11 @@ export const Nav = () => {
 	const [page, setPage] = useState(1);
 	const [reviewPage, setReviewPage] = useState(null);
 	const [reviewUpdate, setReviewUpdate] = useState();
-	const [state, dispatch] = useReducer(reducer, initialState);
+	const [state, dispatch] = useReducer(navReducer, initialState);
 	const pageRef = useRef(1);
 	const [loading, setLoading] = useState(true);
 	const [ip, setIP] = useState("");
-	const [mode, setMode] = useState("light");
 	const [userVotes, setUserVotes] = useState(null);
-	//const elemRef = useRef(null);
-	const colorMode = useMemo(
-		() => ({
-			toggleColorMode: () => {
-				setMode((prevMode) =>
-					prevMode === "light" ? "dark" : "light"
-				);
-			},
-		}),
-		[]
-	);
-
-	const theme = useMemo(
-		() =>
-			createTheme({
-				palette: {
-					mode,
-				},
-			}),
-		[mode]
-	);
 	const { reviews, reviewItems } = state;
 	const maxPerPage = 5;
 
@@ -180,33 +104,29 @@ export const Nav = () => {
 		setReviewPage(renderPage);
 	};
 
-	const pageChange = useCallback(
-		(page) => {
-			let currReviews = [];
+	const renderReviews = useCallback(() => {
+		let currReviews = [];
 
-			if (filter === "newest") currReviews = reviews.newest;
-			else currReviews = reviews.oldest;
+		if (filter === "newest") currReviews = reviews.newest;
+		else currReviews = reviews.oldest;
 
-			if (!currReviews[page * maxPerPage - 1]) {
-				dispatch({
-					type: ACTIONS.SET_REVIEW_ITEMS,
-					data: currReviews.slice(
-						page * maxPerPage - maxPerPage,
-						currReviews.length
-					),
-				});
-			} else {
-				let arrPos = page * maxPerPage - maxPerPage;
-				if (arrPos < 0) arrPos = 0;
+		if (!currReviews[page * maxPerPage - 1]) {
+			dispatch({
+				type: ACTIONS.SET_REVIEW_ITEMS,
+				data: currReviews.slice(
+					page * maxPerPage - maxPerPage,
+					currReviews.length
+				),
+			});
+		} else {
+			let arrPos = page * maxPerPage - maxPerPage;
 
-				dispatch({
-					type: ACTIONS.SET_REVIEW_ITEMS,
-					data: currReviews.slice(arrPos, arrPos + maxPerPage),
-				});
-			}
-		},
-		[filter, reviews.newest, reviews.oldest]
-	);
+			dispatch({
+				type: ACTIONS.SET_REVIEW_ITEMS,
+				data: currReviews.slice(arrPos, arrPos + maxPerPage),
+			});
+		}
+	}, [filter, reviews.newest, reviews.oldest, page]);
 
 	const createReview = () => {
 		if (!profile) {
@@ -223,6 +143,7 @@ export const Nav = () => {
 	}, [db]);
 
 	const upvoteHandler = async (vote, id, upvotes, upvoted, downvoted) => {
+		console.log(vote);
 		if (!profile) {
 			setValue(4);
 			setReviewPage(null);
@@ -288,11 +209,7 @@ export const Nav = () => {
 			return;
 		} else if (vote === "down") {
 			await updateDoc(review, { upvotes: downvote });
-			setReviewUpdate(() => ({
-				newId: id,
-				newUpvotes: downvote,
-				changed: true,
-			}));
+			renderReviews();
 			return;
 		}
 
@@ -332,7 +249,7 @@ export const Nav = () => {
 			fetch("https://geolocation-db.com/json/")
 				.then((res) => res.json())
 				.then((data) => setIP(data.IPv4));
-		console.log("rendering");
+		//console.log("rendering");
 		if (reviews.newest.length === 0) {
 			let currReviews = [];
 			getReviews().then((res) => {
@@ -358,60 +275,26 @@ export const Nav = () => {
 			});
 		}
 
-		let currReviews = { newest: [], oldest: [] };
-		for (const review of reviews.newest) currReviews.newest.push(review);
-		for (const review of reviews.oldest) currReviews.oldest.push(review);
+		let currReviews = {
+			newest: [...reviews.newest],
+			oldest: [...reviews.oldest],
+		};
 
-		if (reviewUpdate) {
-			if (reviewUpdate.changed) {
-				currReviews.newest.forEach((review) => {
-					if (review[0] === reviewUpdate.newId) {
-						review[1].upvotes = reviewUpdate.newUpvotes;
-					}
-				});
-				currReviews.oldest.forEach((review) => {
-					if (review[0] === reviewUpdate.newId)
-						review[1].upvotes = reviewUpdate.newUpvotes;
-				});
+		if (reviewUpdate && reviewUpdate.changed) {
+			currReviews.newest.forEach((review) => {
+				if (review[0] === reviewUpdate.newId) {
+					review[1].upvotes = reviewUpdate.newUpvotes;
+				}
+			});
+			currReviews.oldest.forEach((review) => {
+				if (review[0] === reviewUpdate.newId)
+					review[1].upvotes = reviewUpdate.newUpvotes;
+			});
 
-				setReviewUpdate((update) => ({ ...update, changed: false }));
-				pageChange(pageRef.current);
-			}
-			pageChange(pageRef.current);
-		} else {
-			if (filter === "newest") currReviews = reviews.newest;
-			else currReviews = reviews.oldest;
-
-			if (!currReviews[pageRef.current * maxPerPage - 1]) {
-				dispatch({
-					type: ACTIONS.SET_REVIEW_ITEMS,
-					data: currReviews.slice(
-						pageRef.current * maxPerPage - maxPerPage,
-						currReviews.length
-					),
-				});
-			} else {
-				let arrPos = pageRef.current * maxPerPage - maxPerPage;
-				if (arrPos < 0) arrPos = 0;
-
-				dispatch({
-					type: ACTIONS.SET_REVIEW_ITEMS,
-					data: currReviews.slice(arrPos, arrPos + maxPerPage),
-				});
-			}
-
-			// if (filter === "newest")
-			// 	dispatch({
-			// 		type: ACTIONS.SET_REVIEW_ITEMS,
-			// 		data: currReviews.newest.slice(0, maxPerPage),
-			// 	});
-			// else if (filter === "oldest")
-			// 	dispatch({
-			// 		type: ACTIONS.SET_REVIEW_ITEMS,
-			// 		data: currReviews.oldest.slice(0, maxPerPage),
-			// 	});
-		}
-	}, [filter, reviewUpdate, reviews, pageChange, ip, getReviews]);
+			//setReviewUpdate((update) => ({ ...update, changed: false }));
+			renderReviews();
+		} else renderReviews();
+	}, [filter, reviewUpdate, reviews, ip, getReviews, renderReviews]);
 
 	useEffect(() => {
 		const getUpvoteHistory = async () => {
@@ -421,7 +304,6 @@ export const Nav = () => {
 				);
 				querySnapshot.forEach((doc) => {
 					if (doc.data().displayName === profile.displayName) {
-						//console.log(userVotesDoc);
 						setUserVotes(doc.data());
 					}
 				});
@@ -433,7 +315,6 @@ export const Nav = () => {
 		const unsubscribe = onSnapshot(collection(db, "reviews"), (res) => {
 			let reviews = [];
 			for (const doc of res.docs) reviews.push([doc.id, doc.data()]);
-			//console.log(reviews);
 			reviews.sort((a, b) => b[1].created - a[1].created); // getting newest created
 			let oldestReviews = [...reviews];
 			oldestReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest created
@@ -443,271 +324,190 @@ export const Nav = () => {
 				newest: reviews,
 				oldest: oldestReviews,
 			});
-
-			if (reviewUpdate) {
-				if (reviewUpdate.changed) {
-					setReviewUpdate((update) => ({
-						...update,
-						changed: false,
-					}));
-				}
-			}
+			//console.log("running");
+			// if (reviewUpdate) {
+			// 	if (reviewUpdate.changed) {
+			// 		setReviewUpdate((update) => ({
+			// 			...update,
+			// 			changed: false,
+			// 		}));
+			// 	}
+			// }
 		});
-		return unsubscribe;
-	}, [profile, db, reviewUpdate, filter]);
 
-	// useEffect(() => {
-	// 	//let yTop =
-	// 	// 	window.innerHeight - elemRef.current.getBoundingClientRect().top;
-	// 	onscroll = () => {
-	// 		let currScrollYPos = window.innerHeight - window.scrollY;
-	// 		//console.log("tabs y top pos: " + currScrollYPos);
-	// 		console.log("scroll y pos: " + currScrollYPos);
-	// 	};
-	// }, []);
+		return unsubscribe;
+	}, [profile, db, filter]);
 
 	return (
-		<ColorModeContext.Provider value={colorMode}>
-			<ThemeProvider theme={theme}>
-				<CssBaseline />
-				<Container maxWidth="sm">
-					<Box textAlign="center">
-						<Typography
-							variant="h2"
-							fontWeight="500"
-							color={"primary"}
+		<>
+			<CssBaseline />
+			<Container maxWidth="sm">
+				<Box textAlign="center">
+					<Typography variant="h2" fontWeight="500" color={"primary"}>
+						Honest Reviews
+					</Typography>
+					<ToggleDarkMode />
+					<Box display="flex" justifyContent="center">
+						<Tabs
+							value={value}
+							onChange={handleChange}
+							aria-label="navigation tabs"
+							TabIndicatorProps={{
+								style: {
+									display: "none",
+								},
+							}}
+							variant="scrollable"
+							scrollButtons
+							allowScrollButtonsMobile
 						>
-							Honest Reviews
-						</Typography>
-						<ToggleDarkMode />
-						<Box
-							//ref={elemRef}
-							display="flex"
-							justifyContent="center"
-						>
-							<Tabs
-								value={value}
-								onChange={handleChange}
-								aria-label="navigation tabs"
-								TabIndicatorProps={{
-									style: {
-										display: "none",
-									},
+							<Tab
+								label="Reviews"
+								{...a11yProps(0)}
+								sx={tabStyle}
+								onClick={() => {
+									(newReview && setNewReview(!newReview)) ||
+										(reviewPage && setReviewPage(null));
+									setPage(1);
+									pageRef.current = 1;
+									renderReviews();
 								}}
-								variant="scrollable"
-								scrollButtons
-								allowScrollButtonsMobile
-							>
-								<Tab
-									label="Reviews"
-									{...a11yProps(0)}
-									sx={{
-										fontWeight: "bold",
-										color: "text.primary",
-									}}
-									onClick={() => {
-										(newReview &&
-											setNewReview(!newReview)) ||
-											(reviewPage && setReviewPage(null));
-										setPage(1);
-										pageChange(1);
-										pageRef.current = 1;
-									}}
-								/>
-								<Tab
-									label="About"
-									{...a11yProps(1)}
-									sx={{
-										fontWeight: "bold",
-										color: "text.primary",
-									}}
-									onClick={() =>
-										reviewPage && setReviewPage(null)
-									}
-								/>
-								<Tab
-									label="Contact"
-									{...a11yProps(2)}
-									sx={{
-										fontWeight: "bold",
-										color: "text.primary",
-									}}
-									onClick={() =>
-										reviewPage && setReviewPage(null)
-									}
-								/>
-								<Tab
-									label="Privacy"
-									{...a11yProps(3)}
-									sx={{
-										color: "text.primary",
-										fontWeight: "bold",
-									}}
-									onClick={() =>
-										reviewPage && setReviewPage(null)
-									}
-								/>
-								<Tab
-									label="Profile"
-									{...a11yProps(4)}
-									sx={{
-										color: "text.primary",
-										fontWeight: "bold",
-									}}
-									onClick={() =>
-										reviewPage && setReviewPage(null)
-									}
-								/>
-							</Tabs>
-						</Box>
-						{reviewPage}
-						{!reviewPage && !newReview && value === 0 && (
-							<IconButton
-								onClick={createReview}
-								aria-label="create review"
-							>
-								<AddBoxIcon />
-							</IconButton>
-						)}
-						{!reviewPage && newReview && value === 0 && (
-							<IconButton
-								onClick={createReview}
-								aria-label="cancel review"
-							>
-								<CancelIcon />
-							</IconButton>
-						)}
-						<TabPanel value={value} index={0}>
-							{!reviewItems && <CircularProgress size={100} />}
-							{!reviewPage && !newReview && reviewItems && (
-								<Stack justifyContent="center" spacing={3}>
-									<Stack
-										direction="row"
-										alignItems="center"
-										justifyContent="space-between"
-									>
-										<FormControl
-											sx={{
-												width: "110px",
-												textAlign: "center",
-											}}
-										>
-											<InputLabel>Filter</InputLabel>
-											<Select
-												labelId="demo-simple-select-label"
-												id="demo-simple-select"
-												value={filter}
-												label="Filter"
-												onChange={(event) =>
-													handlerFilter(event)
-												}
-											>
-												<MenuItem value={"newest"}>
-													Newest
-												</MenuItem>
-												<MenuItem value={"oldest"}>
-													Oldest
-												</MenuItem>
-											</Select>
-										</FormControl>
-										<IconButton onClick={syncHandler}>
-											<SyncIcon />
-										</IconButton>
-									</Stack>
-									{loading && (
-										<CircularProgress
-											sx={{
-												alignSelf: "center",
-											}}
-											size={80}
-										/>
-									)}
-									{!loading &&
-										reviewItems.map((val, indx) => {
-											return (
-												<ReviewItem
-													date={val[1].created}
-													reviewer={val[1].reviewer}
-													title={val[1].title}
-													link={val[1].link}
-													caption={val[1].caption}
-													upvotes={val[1].upvotes}
-													key={indx}
-													reviewHandler={
-														reviewHandler
-													}
-													upvoteHandler={
-														upvoteHandler
-													}
-													id={val[0]}
-													isUpvoted={
-														(userVotes &&
-															userVotes.postsUpvoted.find(
-																(post) =>
-																	post.postId ===
-																		val[0] &&
-																	post.upvoted
-															) &&
-															true) ||
-														false
-													}
-													isDownvoted={
-														(userVotes &&
-															userVotes.postsUpvoted.find(
-																(post) =>
-																	post.postId ===
-																		val[0] &&
-																	post.downvoted
-															) &&
-															true) ||
-														false
-													}
-												/>
-											);
-										})}
-									{!loading && (
-										<Pagination
-											count={Math.ceil(
-												reviews.newest &&
-													reviews.newest.length /
-														maxPerPage
-											)}
-											page={page}
-											sx={{
-												display: "flex",
-												justifyContent: "center",
-											}}
-											onChange={(event, page) => {
-												pageRef.current = page;
-												setPage(page);
-												pageChange(page);
-											}}
-										/>
-									)}
-								</Stack>
-							)}
-							{newReview && (
-								<CreateReview
-									createReview={createReview}
-									ip={ip}
-								/>
-							)}
-						</TabPanel>
-						<TabPanel value={value} index={1}>
-							<About />
-						</TabPanel>
-						<TabPanel value={value} index={2}>
-							<Contact />
-						</TabPanel>
-						<TabPanel value={value} index={3}>
-							<Privacy />
-						</TabPanel>
-						<TabPanel value={value} index={4}>
-							<Profile />
-						</TabPanel>
+							/>
+							<Tab
+								label="About"
+								{...a11yProps(1)}
+								sx={tabStyle}
+								onClick={() =>
+									reviewPage && setReviewPage(null)
+								}
+							/>
+							<Tab
+								label="Contact"
+								{...a11yProps(2)}
+								sx={tabStyle}
+								onClick={() =>
+									reviewPage && setReviewPage(null)
+								}
+							/>
+							<Tab
+								label="Privacy"
+								{...a11yProps(3)}
+								sx={tabStyle}
+								onClick={() =>
+									reviewPage && setReviewPage(null)
+								}
+							/>
+							<Tab
+								label="Profile"
+								{...a11yProps(4)}
+								sx={tabStyle}
+								onClick={() =>
+									reviewPage && setReviewPage(null)
+								}
+							/>
+						</Tabs>
 					</Box>
-				</Container>
-			</ThemeProvider>
-		</ColorModeContext.Provider>
+					{reviewPage}
+					{!reviewPage && value === 0 && (
+						<IconButton
+							onClick={createReview}
+							aria-label="create review"
+						>
+							{(!newReview && <AddBoxIcon />) || <CancelIcon />}
+						</IconButton>
+					)}
+					<TabPanel value={value} index={0}>
+						{!reviewItems && <CircularProgress size={100} />}
+						{!reviewPage && !newReview && reviewItems && (
+							<Stack justifyContent="center" spacing={3}>
+								<Filter
+									filter={filter}
+									handlerFilter={handlerFilter}
+									syncHandler={syncHandler}
+								/>
+								{(loading && (
+									<CircularProgress
+										sx={{
+											alignSelf: "center",
+										}}
+										size={80}
+									/>
+								)) ||
+									reviewItems.map((val, indx) => {
+										return (
+											<ReviewItem
+												date={val[1].created}
+												reviewer={val[1].reviewer}
+												title={val[1].title}
+												link={val[1].link}
+												caption={val[1].caption}
+												upvotes={val[1].upvotes}
+												key={indx}
+												reviewHandler={reviewHandler}
+												upvoteHandler={upvoteHandler}
+												id={val[0]}
+												isUpvoted={
+													userVotes &&
+													userVotes.postsUpvoted.find(
+														(post) =>
+															post.postId ===
+																val[0] &&
+															post.upvoted
+													) &&
+													true
+												}
+												isDownvoted={
+													userVotes &&
+													userVotes.postsUpvoted.find(
+														(post) =>
+															post.postId ===
+																val[0] &&
+															post.downvoted
+													) &&
+													true
+												}
+											/>
+										);
+									})}
+								{!loading && (
+									<Pagination
+										count={Math.ceil(
+											reviews.newest &&
+												reviews.newest.length /
+													maxPerPage
+										)}
+										page={page}
+										sx={{
+											display: "flex",
+											justifyContent: "center",
+										}}
+										onChange={(event, page) => {
+											pageRef.current = page;
+											setPage(page);
+											renderReviews();
+										}}
+									/>
+								)}
+							</Stack>
+						)}
+						{newReview && (
+							<CreateReview createReview={createReview} ip={ip} />
+						)}
+					</TabPanel>
+					<TabPanel value={value} index={1}>
+						<About />
+					</TabPanel>
+					<TabPanel value={value} index={2}>
+						<Contact />
+					</TabPanel>
+					<TabPanel value={value} index={3}>
+						<Privacy />
+					</TabPanel>
+					<TabPanel value={value} index={4}>
+						<Profile />
+					</TabPanel>
+				</Box>
+			</Container>
+		</>
 	);
 };
