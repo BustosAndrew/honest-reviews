@@ -52,7 +52,6 @@ export const Nav = () => {
 	const [filter, setFilter] = useState("newest");
 	const [page, setPage] = useState(1);
 	const [reviewPage, setReviewPage] = useState(null);
-	const [reviewUpdate, setReviewUpdate] = useState();
 	const [state, dispatch] = useReducer(navReducer, initialState);
 	const pageRef = useRef(1);
 	const [loading, setLoading] = useState(true);
@@ -87,7 +86,7 @@ export const Nav = () => {
 		isUpvoted,
 		isDownvoted
 	) => {
-		const renderPage = (
+		const review = (
 			<Review
 				date={date}
 				caption={caption}
@@ -101,32 +100,35 @@ export const Nav = () => {
 				isDownvoted={isDownvoted}
 			/>
 		);
-		setReviewPage(renderPage);
+		setReviewPage(review);
 	};
 
-	const renderReviews = useCallback(() => {
-		let currReviews = [];
+	const renderReviews = useCallback(
+		(page) => {
+			let currReviews = [];
 
-		if (filter === "newest") currReviews = reviews.newest;
-		else currReviews = reviews.oldest;
+			if (filter === "newest") currReviews = reviews.newest;
+			else currReviews = reviews.oldest;
 
-		if (!currReviews[page * maxPerPage - 1]) {
-			dispatch({
-				type: ACTIONS.SET_REVIEW_ITEMS,
-				data: currReviews.slice(
-					page * maxPerPage - maxPerPage,
-					currReviews.length
-				),
-			});
-		} else {
-			let arrPos = page * maxPerPage - maxPerPage;
+			if (!currReviews[page * maxPerPage - 1]) {
+				dispatch({
+					type: ACTIONS.SET_REVIEW_ITEMS,
+					data: currReviews.slice(
+						page * maxPerPage - maxPerPage,
+						currReviews.length
+					),
+				});
+			} else {
+				let arrPos = page * maxPerPage - maxPerPage;
 
-			dispatch({
-				type: ACTIONS.SET_REVIEW_ITEMS,
-				data: currReviews.slice(arrPos, arrPos + maxPerPage),
-			});
-		}
-	}, [filter, reviews.newest, reviews.oldest, page]);
+				dispatch({
+					type: ACTIONS.SET_REVIEW_ITEMS,
+					data: currReviews.slice(arrPos, arrPos + maxPerPage),
+				});
+			}
+		},
+		[filter, reviews.newest, reviews.oldest]
+	);
 
 	const createReview = () => {
 		if (!profile) {
@@ -143,7 +145,6 @@ export const Nav = () => {
 	}, [db]);
 
 	const upvoteHandler = async (vote, id, upvotes, upvoted, downvoted) => {
-		console.log(vote);
 		if (!profile) {
 			setValue(4);
 			setReviewPage(null);
@@ -201,47 +202,30 @@ export const Nav = () => {
 		const downvote = upvotes - 1;
 		if (vote === "up") {
 			await updateDoc(review, { upvotes: upvote });
-			setReviewUpdate(() => ({
-				newId: id,
-				newUpvotes: upvote,
-				changed: true,
-			}));
 			return;
 		} else if (vote === "down") {
 			await updateDoc(review, { upvotes: downvote });
-			renderReviews();
 			return;
 		}
 
 		if (vote === "revert-up") {
 			await updateDoc(review, { upvotes: upvotes });
-			setReviewUpdate(() => ({
-				newId: id,
-				newUpvotes: upvotes,
-				changed: true,
-			}));
 			return;
 		} else if (vote === "revert-down") {
 			await updateDoc(review, { upvotes: upvotes });
-			setReviewUpdate(() => ({
-				newId: id,
-				newUpvotes: upvotes,
-				changed: true,
-			}));
 			return;
 		}
 	};
 
 	const syncHandler = () => {
-		const currReviews = [];
-
 		dispatch({
 			type: ACTIONS.SET_REVIEWS,
-			newest: currReviews,
-			oldest: currReviews,
+			newest: [],
+			oldest: [],
 		});
 		setLoading(!loading);
 		setPage(1);
+		pageRef.current = 1;
 	};
 
 	useEffect(() => {
@@ -259,10 +243,8 @@ export const Nav = () => {
 
 				if (!(currReviews.length === 0)) {
 					currReviews.sort((a, b) => b[1].created - a[1].created); // getting newest created
-					let oldestReviews = [];
+					let oldestReviews = [...currReviews];
 
-					for (const review of currReviews)
-						oldestReviews.push(review);
 					oldestReviews.sort((a, b) => a[1].created - b[1].created); // getting oldest created
 
 					dispatch({
@@ -275,26 +257,8 @@ export const Nav = () => {
 			});
 		}
 
-		let currReviews = {
-			newest: [...reviews.newest],
-			oldest: [...reviews.oldest],
-		};
-
-		if (reviewUpdate && reviewUpdate.changed) {
-			currReviews.newest.forEach((review) => {
-				if (review[0] === reviewUpdate.newId) {
-					review[1].upvotes = reviewUpdate.newUpvotes;
-				}
-			});
-			currReviews.oldest.forEach((review) => {
-				if (review[0] === reviewUpdate.newId)
-					review[1].upvotes = reviewUpdate.newUpvotes;
-			});
-
-			//setReviewUpdate((update) => ({ ...update, changed: false }));
-			renderReviews();
-		} else renderReviews();
-	}, [filter, reviewUpdate, reviews, ip, getReviews, renderReviews]);
+		renderReviews(pageRef.current);
+	}, [filter, reviews, ip, getReviews, renderReviews]);
 
 	useEffect(() => {
 		const getUpvoteHistory = async () => {
@@ -324,15 +288,7 @@ export const Nav = () => {
 				newest: reviews,
 				oldest: oldestReviews,
 			});
-			//console.log("running");
-			// if (reviewUpdate) {
-			// 	if (reviewUpdate.changed) {
-			// 		setReviewUpdate((update) => ({
-			// 			...update,
-			// 			changed: false,
-			// 		}));
-			// 	}
-			// }
+			getUpvoteHistory();
 		});
 
 		return unsubscribe;
@@ -370,7 +326,7 @@ export const Nav = () => {
 										(reviewPage && setReviewPage(null));
 									setPage(1);
 									pageRef.current = 1;
-									renderReviews();
+									renderReviews(1);
 								}}
 							/>
 							<Tab
@@ -418,7 +374,7 @@ export const Nav = () => {
 					)}
 					<TabPanel value={value} index={0}>
 						{!reviewItems && <CircularProgress size={100} />}
-						{!reviewPage && !newReview && reviewItems && (
+						{!reviewPage && !newReview && (
 							<Stack justifyContent="center" spacing={3}>
 								<Filter
 									filter={filter}
@@ -433,42 +389,49 @@ export const Nav = () => {
 										size={80}
 									/>
 								)) ||
-									reviewItems.map((val, indx) => {
-										return (
-											<ReviewItem
-												date={val[1].created}
-												reviewer={val[1].reviewer}
-												title={val[1].title}
-												link={val[1].link}
-												caption={val[1].caption}
-												upvotes={val[1].upvotes}
-												key={indx}
-												reviewHandler={reviewHandler}
-												upvoteHandler={upvoteHandler}
-												id={val[0]}
-												isUpvoted={
-													userVotes &&
-													userVotes.postsUpvoted.find(
-														(post) =>
-															post.postId ===
-																val[0] &&
-															post.upvoted
-													) &&
-													true
-												}
-												isDownvoted={
-													userVotes &&
-													userVotes.postsUpvoted.find(
-														(post) =>
-															post.postId ===
-																val[0] &&
-															post.downvoted
-													) &&
-													true
-												}
-											/>
-										);
-									})}
+									(reviewItems &&
+										reviewItems.map((val, indx) => {
+											return (
+												<ReviewItem
+													date={val[1].created}
+													reviewer={val[1].reviewer}
+													title={val[1].title}
+													link={val[1].link}
+													caption={val[1].caption}
+													upvotes={val[1].upvotes}
+													key={indx}
+													reviewHandler={
+														reviewHandler
+													}
+													upvoteHandler={
+														upvoteHandler
+													}
+													id={val[0]}
+													isUpvoted={
+														(userVotes &&
+															userVotes.postsUpvoted.find(
+																(post) =>
+																	post.postId ===
+																		val[0] &&
+																	post.upvoted
+															) &&
+															true) ||
+														false
+													}
+													isDownvoted={
+														(userVotes &&
+															userVotes.postsUpvoted.find(
+																(post) =>
+																	post.postId ===
+																		val[0] &&
+																	post.downvoted
+															) &&
+															true) ||
+														false
+													}
+												/>
+											);
+										}))}
 								{!loading && (
 									<Pagination
 										count={Math.ceil(
@@ -484,7 +447,7 @@ export const Nav = () => {
 										onChange={(event, page) => {
 											pageRef.current = page;
 											setPage(page);
-											renderReviews();
+											renderReviews(page);
 										}}
 									/>
 								)}

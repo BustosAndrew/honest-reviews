@@ -10,7 +10,7 @@ import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
 import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const CardInfo = ({
 	date,
@@ -22,11 +22,16 @@ const CardInfo = ({
 	upvotes,
 	upvoteHandler,
 	id,
-	isDownvoted,
 	isUpvoted,
+	isDownvoted,
 }) => {
 	const [upvoted, setUpvoted] = useState(isUpvoted);
 	const [downvoted, setDownvoted] = useState(isDownvoted);
+
+	useEffect(() => {
+		setDownvoted(isDownvoted);
+		setUpvoted(isUpvoted);
+	}, [isDownvoted, isUpvoted]);
 
 	return (
 		<Box display="flex">
