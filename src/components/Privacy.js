@@ -5,7 +5,7 @@ export const Privacy = () => {
 		<>
 			<Typography variant="h6">
 				By using this site, you agree to having your public IP address
-				submitted to the database upon review submission.
+				submitted to the database upon submitting your first review.
 			</Typography>
 		</>
 	);

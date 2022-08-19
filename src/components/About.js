@@ -14,7 +14,7 @@ export const About = () => {
 				customers can't make reviews due to certain company policies on
 				their platform. However, this site isn't limited to hotel/Airbnb
 				reviews, because anyone can review whatever they want! Just make
-				sure all reviews are honest!
+				sure all reviews are honest! Or else 😈
 			</Typography>
 			<br />
 			<lottie-player
