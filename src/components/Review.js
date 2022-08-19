@@ -144,7 +144,9 @@ const CardInfo = ({
 					<Link href={link} sx={{ mb: 1.5 }}>
 						{link}
 					</Link>
-					<Typography variant="body2">{caption}</Typography>
+					<Typography sx={{ whiteSpace: "pre-line" }} variant="body2">
+						{caption}
+					</Typography>
 				</CardContent>
 			</Stack>
 		</div>
