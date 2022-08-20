@@ -179,7 +179,7 @@ export const Review = ({
 					bgcolor:
 						theme.palette.mode === "light" ? "#f5f5f5" : "inherit",
 					height: "100%",
-					overflowWrap: "break-word",
+					overflowWrap: "anywhere",
 				}}
 			>
 				<CardInfo

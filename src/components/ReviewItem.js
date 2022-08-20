@@ -180,7 +180,7 @@ export const ReviewItem = ({
 					bgcolor:
 						theme.palette.mode === "light" ? "#f5f5f5" : "inherit",
 					maxHeight: "10rem",
-					overflowWrap: "break-word",
+					overflowWrap: "anywhere",
 				}}
 				raised={raised}
 				onMouseOver={() => setRaised(true)}
