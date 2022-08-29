@@ -94,10 +94,10 @@ export const CreateReview = ({ createReview, ip }) => {
 
 		// Add a new document in collection "reviews"
 		await addDoc(collection(db, "reviews"), {
-			title: title,
+			title: title.trim(),
 			reviewer: profile.displayName,
-			link: link,
-			caption: caption,
+			link: link.trim(),
+			caption: caption.trim(),
 			created: serverTimestamp(),
 			upvotes: 1,
 		});
