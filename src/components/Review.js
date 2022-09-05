@@ -28,128 +28,130 @@ const CardInfo = ({
 	const [downvoted, setDownvoted] = useState(isDownvoted);
 
 	return (
-		<div style={{ display: "flex" }}>
-			<CardActions
-				sx={{
-					alignSelf: "flex-start",
-				}}
-			>
-				<Stack textAlign="center">
-					<IconButton
-						onClick={() => {
-							if (downvoted) {
-								setDownvoted(false);
-								setUpvoted(true);
-								upvoteHandler(
-									"revert-down",
-									id,
-									currUpvotes + 2,
-									true,
-									false
-								);
-								setCurrUpvotes(currUpvotes + 2);
-							} else if (upvoted === false) {
-								setUpvoted(true);
-								upvoteHandler(
-									"up",
-									id,
-									currUpvotes,
-									true,
-									false
-								);
-								setCurrUpvotes(currUpvotes + 1);
-							} else {
-								setUpvoted(false);
-								upvoteHandler(
-									"revert-up",
-									id,
-									currUpvotes - 1,
-									false,
-									false
-								);
-								setCurrUpvotes(currUpvotes - 1);
-							}
-						}}
-					>
-						{!upvoted ? (
-							<ArrowCircleUpIcon />
-						) : (
-							<ArrowCircleRightIcon
-								sx={{ transform: "rotate(-.25turn)" }}
-							/>
-						)}
-					</IconButton>
-					<Typography fontWeight="bold">{currUpvotes}</Typography>
-					<IconButton
-						onClick={() => {
-							if (upvoted) {
-								setUpvoted(false);
-								setDownvoted(true);
-								upvoteHandler(
-									"revert-up",
-									id,
-									currUpvotes - 2,
-									false,
-									true
-								);
-								setCurrUpvotes(currUpvotes - 2);
-							} else if (downvoted === false) {
-								setDownvoted(true);
-								upvoteHandler(
-									"down",
-									id,
-									currUpvotes,
-									false,
-									true
-								);
-								setCurrUpvotes(currUpvotes - 1);
-							} else {
-								setDownvoted(false);
-								upvoteHandler(
-									"revert-down",
-									id,
-									currUpvotes + 1,
-									false,
-									false
-								);
-								setCurrUpvotes(currUpvotes + 1);
-							}
-						}}
-					>
-						{!downvoted ? (
-							<ArrowCircleDownIcon />
-						) : (
-							<ArrowCircleRightIcon
-								sx={{ transform: "rotate(.25turn)" }}
-							/>
-						)}
-					</IconButton>
+		<Box>
+			<Box sx={{ display: "flex" }}>
+				<CardActions
+					sx={{
+						alignSelf: "flex-start",
+					}}
+				>
+					<Stack textAlign="center">
+						<IconButton
+							onClick={() => {
+								if (downvoted) {
+									setDownvoted(false);
+									setUpvoted(true);
+									upvoteHandler(
+										"revert-down",
+										id,
+										currUpvotes + 2,
+										true,
+										false
+									);
+									setCurrUpvotes(currUpvotes + 2);
+								} else if (upvoted === false) {
+									setUpvoted(true);
+									upvoteHandler(
+										"up",
+										id,
+										currUpvotes,
+										true,
+										false
+									);
+									setCurrUpvotes(currUpvotes + 1);
+								} else {
+									setUpvoted(false);
+									upvoteHandler(
+										"revert-up",
+										id,
+										currUpvotes - 1,
+										false,
+										false
+									);
+									setCurrUpvotes(currUpvotes - 1);
+								}
+							}}
+						>
+							{!upvoted ? (
+								<ArrowCircleUpIcon />
+							) : (
+								<ArrowCircleRightIcon
+									sx={{ transform: "rotate(-.25turn)" }}
+								/>
+							)}
+						</IconButton>
+						<Typography fontWeight="bold">{currUpvotes}</Typography>
+						<IconButton
+							onClick={() => {
+								if (upvoted) {
+									setUpvoted(false);
+									setDownvoted(true);
+									upvoteHandler(
+										"revert-up",
+										id,
+										currUpvotes - 2,
+										false,
+										true
+									);
+									setCurrUpvotes(currUpvotes - 2);
+								} else if (downvoted === false) {
+									setDownvoted(true);
+									upvoteHandler(
+										"down",
+										id,
+										currUpvotes,
+										false,
+										true
+									);
+									setCurrUpvotes(currUpvotes - 1);
+								} else {
+									setDownvoted(false);
+									upvoteHandler(
+										"revert-down",
+										id,
+										currUpvotes + 1,
+										false,
+										false
+									);
+									setCurrUpvotes(currUpvotes + 1);
+								}
+							}}
+						>
+							{!downvoted ? (
+								<ArrowCircleDownIcon />
+							) : (
+								<ArrowCircleRightIcon
+									sx={{ transform: "rotate(.25turn)" }}
+								/>
+							)}
+						</IconButton>
+					</Stack>
+				</CardActions>
+				<Stack>
+					<CardContent sx={{}}>
+						<Typography
+							sx={{ fontSize: 14 }}
+							color="text.secondary"
+							gutterBottom
+						>
+							{date.toDate().toLocaleString()}
+						</Typography>
+						<Typography variant="body1">
+							Reviewed by: {reviewer}
+						</Typography>
+						<Typography variant="h5" component="div">
+							{title}
+						</Typography>
+						<Link href={link}>{link}</Link>
+					</CardContent>
 				</Stack>
-			</CardActions>
-			<Stack>
-				<CardContent sx={{}}>
-					<Typography
-						sx={{ fontSize: 14 }}
-						color="text.secondary"
-						gutterBottom
-					>
-						{date.toDate().toString()}
-					</Typography>
-					<Typography variant="body1">
-						Reviewed by: {reviewer}
-					</Typography>
-					<Typography variant="h5" component="div">
-						{title}
-					</Typography>
-					<Link href={link} sx={{ mb: 1.5 }}>
-						{link}
-					</Link>
-					<Typography sx={{ whiteSpace: "pre-line" }} variant="body2">
-						{caption}
-					</Typography>
-				</CardContent>
-			</Stack>
-		</div>
+			</Box>
+			<CardContent>
+				<Typography sx={{ whiteSpace: "pre-line" }} variant="body2">
+					{caption}
+				</Typography>
+			</CardContent>
+		</Box>
 	);
 };
 

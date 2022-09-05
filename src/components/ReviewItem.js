@@ -132,7 +132,7 @@ const CardInfo = ({
 							color="text.secondary"
 							gutterBottom
 						>
-							{date.toDate().toString()}
+							{date.toDate().toLocaleString()}
 						</Typography>
 						<Typography variant="body1">
 							Reviewed by: {reviewer}
@@ -166,6 +166,7 @@ export const ReviewItem = ({
 }) => {
 	const [raised, setRaised] = useState(false);
 	const theme = useTheme();
+
 	return (
 		<Box
 			sx={{
