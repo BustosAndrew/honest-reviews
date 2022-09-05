@@ -217,17 +217,6 @@ export const Nav = () => {
 		}
 	};
 
-	const syncHandler = () => {
-		dispatch({
-			type: ACTIONS.SET_REVIEWS,
-			newest: [],
-			oldest: [],
-		});
-		setLoading(!loading);
-		setPage(1);
-		pageRef.current = 1;
-	};
-
 	useEffect(() => {
 		if (!ip)
 			fetch("https://geolocation-db.com/json/")
@@ -379,7 +368,6 @@ export const Nav = () => {
 								<Filter
 									filter={filter}
 									handlerFilter={handlerFilter}
-									syncHandler={syncHandler}
 								/>
 								{(loading && (
 									<CircularProgress

@@ -1,11 +1,10 @@
-import { Stack, IconButton } from "@mui/material";
+import { Stack } from "@mui/material";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import InputLabel from "@mui/material/InputLabel";
-import SyncIcon from "@mui/icons-material/Sync";
 
-export const Filter = ({ filter, handlerFilter, syncHandler }) => {
+export const Filter = ({ filter, handlerFilter }) => {
 	return (
 		<Stack
 			direction="row"
@@ -30,9 +29,6 @@ export const Filter = ({ filter, handlerFilter, syncHandler }) => {
 					<MenuItem value={"oldest"}>Oldest</MenuItem>
 				</Select>
 			</FormControl>
-			<IconButton onClick={syncHandler}>
-				<SyncIcon />
-			</IconButton>
 		</Stack>
 	);
 };
