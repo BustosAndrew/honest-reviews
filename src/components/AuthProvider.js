@@ -11,8 +11,6 @@ import {
 	onSnapshot,
 	setDoc,
 	serverTimestamp,
-	getDocs,
-	collection,
 } from "firebase/firestore";
 
 import { FirebaseContext } from "./FirebaseProvider";
