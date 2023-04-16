@@ -59,17 +59,6 @@ export const AuthProvider = (props) => {
 
 	const loginUser = async (username, password) => {
 		try {
-			let email = "";
-			const querySnapshot = await getDocs(
-				collection(myFS, PROFILE_COLLECTION)
-			);
-			querySnapshot.forEach((doc) => {
-				if (doc.data().displayName === username)
-					email = doc.data().email;
-			});
-
-			if (!email) email = username;
-
 			let userCredential = await signInWithEmailAndPassword(
 				myAuth,
 				email,
