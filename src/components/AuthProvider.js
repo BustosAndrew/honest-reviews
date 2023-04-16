@@ -33,18 +33,6 @@ export const AuthProvider = (props) => {
 
 	const registerUser = async (email, password, displayName = "") => {
 		try {
-			let accountExists = false;
-
-			const querySnapshot = await getDocs(
-				collection(myFS, PROFILE_COLLECTION)
-			);
-			querySnapshot.forEach((doc) => {
-				if (doc.data().displayName === displayName)
-					accountExists = true;
-			});
-
-			if (accountExists) return false;
-
 			let userCredential = await createUserWithEmailAndPassword(
 				myAuth,
 				email,
