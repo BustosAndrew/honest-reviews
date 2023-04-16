@@ -78,7 +78,7 @@ export const AuthProvider = (props) => {
 			setUser(user);
 			return true;
 		} catch (ex) {
-			let msg = `Login failure for email(${username}: ${ex.message})`;
+			let msg = `Login failure for email(${email}: ${ex.message})`;
 			console.error(msg);
 			setAuthErrorMessage(ex.message);
 			return false;
