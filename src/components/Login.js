@@ -22,10 +22,11 @@ export const Login = ({ pageHandler, signedInHandler }) => {
 			</Typography>
 			<TextField
 				// id="outlined-error-helper-text"
-				label="Email/Username"
+				label="Email"
 				value={username}
 				onChange={(event) => setUsername(event.target.value)}
 				fullWidth={true}
+				autoComplete="email"
 			/>
 			<TextField
 				// id="outlined-error-helper-text"
@@ -33,6 +34,7 @@ export const Login = ({ pageHandler, signedInHandler }) => {
 				value={pw}
 				onChange={(event) => setPw(event.target.value)}
 				fullWidth={true}
+				autoComplete="current-password"
 			/>
 			<Button
 				onClick={submitHandler}
