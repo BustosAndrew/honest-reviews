@@ -28,6 +28,7 @@ export const Signup = ({ pageHandler }) => {
 				value={email}
 				onChange={(event) => setEmail(event.target.value)}
 				fullWidth={true}
+				autoComplete="email"
 			/>
 			<TextField
 				// id="outlined-error-helper-text"
@@ -35,6 +36,7 @@ export const Signup = ({ pageHandler }) => {
 				value={username}
 				onChange={(event) => setUsername(event.target.value)}
 				fullWidth={true}
+				autoComplete="username"
 			/>
 			<TextField
 				// id="outlined-error-helper-text"
@@ -42,6 +44,7 @@ export const Signup = ({ pageHandler }) => {
 				value={pw}
 				onChange={(event) => setPw(event.target.value)}
 				fullWidth={true}
+				autoComplete="new-password"
 			/>
 			<Button
 				onClick={submitHandler}
